@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "std": "https://deno.land/std@0.213.0/",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js",
+    "oak": "https://deno.land/x/oak@v12.6.2/mod.ts",
+    "openai": "https://esm.sh/openai@4.25.0",
+    "js-tiktoken/lite": "https://esm.sh/js-tiktoken@1.0.8/lite",
+    "langchain/text_splitter": "https://esm.sh/langchain@0.1.6/text_splitter"
+  }
+}
