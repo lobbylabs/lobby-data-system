@@ -6,13 +6,15 @@ CREATE SCHEMA data
 -- Grant permissions for data schema
 -- GRANT ALL ON SCHEMA data TO service_role;
 GRANT USAGE ON SCHEMA data TO service_role;
+
 GRANT ALL ON ALL TABLES IN SCHEMA data TO service_role;
+
 -- GRANT ALL ON ALL ROUTINES IN SCHEMA data TO service_role;
 -- GRANT ALL ON ALL SEQUENCES IN SCHEMA data TO service_role;
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA data GRANT ALL ON TABLES TO service_role;
+
 -- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA data GRANT ALL ON ROUTINES TO service_role;
 -- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA data GRANT ALL ON SEQUENCES TO service_role;
-
 -- Create tables
 CREATE TABLE data.users(
     id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid()
@@ -42,7 +44,8 @@ CREATE TABLE data.bots(
     created_at timestamp NOT NULL DEFAULT now(),
     updated_at timestamp NOT NULL DEFAULT now(),
     CONSTRAINT bots_pkey PRIMARY KEY (organization_id, id),
-    CONSTRAINT fk_organization FOREIGN KEY (organization_id) REFERENCES data.organizations(id)
+    CONSTRAINT fk_organization FOREIGN KEY (organization_id) REFERENCES data.organizations(id),
+    CONSTRAINT fk_user FOREIGN KEY (user_id_owner) REFERENCES data.users(id)
 )
 PARTITION BY LIST (organization_id);
 
@@ -52,7 +55,7 @@ CREATE INDEX ON data.bots USING hnsw(bot_summary_embedding_jina_v2_base_en vecto
 
 -- User Conversations
 CREATE TABLE data.conversations(
-    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL,
     organization_id uuid NOT NULL,
     bot_id uuid NOT NULL,
@@ -74,11 +77,11 @@ CREATE INDEX ON data.conversations USING hnsw(conversation_summary_embedding_jin
 
 -- User Messages
 CREATE TABLE data.messages(
-    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL,
     organization_id uuid NOT NULL,
     bot_id uuid NOT NULL,
-    conversation_id bigint NOT NULL,
+    conversation_id uuid NOT NULL,
     message_type varchar(100) NOT NULL,
     message_index bigint NOT NULL,
     message_content text NOT NULL,
@@ -98,7 +101,7 @@ CREATE INDEX ON data.messages USING hnsw(message_content_embedding_jina_v2_base_
 
 -- Organization Documents
 CREATE TABLE data.documents(
-    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
     bot_id uuid NOT NULL,
     organization_id uuid NOT NULL,
     title varchar(255) NOT NULL,
@@ -132,15 +135,15 @@ CREATE INDEX ON data.documents USING hnsw(document_summary_embedding_jina_v2_bas
 
 -- Organization Document Chunks
 CREATE TABLE data.document_chunks(
-    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY,
+    id uuid NOT NULL DEFAULT gen_random_uuid(),
     bot_id uuid NOT NULL,
     organization_id uuid NOT NULL,
-    document_id bigint NOT NULL,
+    document_id uuid NOT NULL,
     chunk_content text NOT NULL,
     chunk_content_embedding_ada_002 extensions.vector(1536) NULL,
     chunk_content_embedding_jina_v2_base_en extensions.vector(768) NULL,
-    prev_chunk bigint NULL,
-    next_chunk bigint NULL,
+    prev_chunk uuid NULL,
+    next_chunk uuid NULL,
     CONSTRAINT document_chunks_pkey PRIMARY KEY (bot_id, id),
     CONSTRAINT fk_organization FOREIGN KEY (organization_id) REFERENCES data.organizations(id),
     CONSTRAINT fk_bot FOREIGN KEY (organization_id, bot_id) REFERENCES data.bots(organization_id, id),
@@ -234,13 +237,13 @@ SECURITY DEFINER;
 
 CREATE FUNCTION data.document_chunk_similarity_search(p_organization_id uuid, p_bot_id uuid, p_user_id uuid, p_threshold float, p_k int, p_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL)
     RETURNS TABLE(
-        id bigint,
+        id uuid,
         bot_id uuid,
         organization_id uuid,
-        document_id bigint,
+        document_id uuid,
         chunk_content text,
-        prev_chunk bigint,
-        next_chunk bigint,
+        prev_chunk uuid,
+        next_chunk uuid,
         similarity float)
     LANGUAGE plpgsql
     STABLE
@@ -310,10 +313,10 @@ CREATE FUNCTION data.create_document_with_chunks(p_bot_id uuid, p_organization_i
     RETURNS boolean
     AS $$
 DECLARE
-    _doc_id bigint;
+    _doc_id uuid;
     _chunk json;
-    _previous_chunk_id bigint := NULL;
-    _current_chunk_id bigint;
+    _previous_chunk_id uuid := NULL;
+    _current_chunk_id uuid;
     _num_chunks integer := 0;
     _chunk_content_embedding_ada_002 extensions.vector(1536);
     _chunk_content_embedding_jina_v2_base_en extensions.vector(768);
@@ -446,6 +449,127 @@ END IF;
         VALUES (_new_user_id, _new_org_id)
     RETURNING
         data.organization_members.user_id, data.organization_members.organization_id;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION data.get_users_orgs(p_organization_id uuid DEFAULT NULL)
+    RETURNS TABLE(
+        user_id uuid,
+        organization_ids uuid[]
+    )
+    AS $$
+BEGIN
+    IF p_organization_id IS NULL THEN
+        RETURN QUERY
+        SELECT
+            u.id AS user_id,
+            ARRAY_AGG(om.organization_id) AS organization_ids
+        FROM
+            data.users u
+            JOIN data.organization_members om ON u.id = om.user_id
+        GROUP BY
+            u.id;
+    ELSE
+        RETURN QUERY
+        SELECT
+            u.id AS user_id,
+            ARRAY_AGG(om.organization_id) AS organization_ids
+        FROM
+            data.users u
+            JOIN data.organization_members om ON u.id = om.user_id
+        WHERE
+            om.organization_id = p_organization_id
+        GROUP BY
+            u.id;
+    END IF;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION data.get_user_conversations(p_user_id uuid)
+    RETURNS TABLE(
+        LIKE data.conversations
+    )
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        c.*
+    FROM
+        data.conversations c
+    WHERE
+        c.user_id = p_user_id
+    ORDER BY
+        c.updated_at DESC;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION data.create_conversation(p_user_id uuid, p_organization_id uuid, p_bot_id uuid)
+    RETURNS uuid
+    AS $$
+DECLARE
+    v_new_conversation_id uuid;
+BEGIN
+    INSERT INTO data.conversations(user_id, organization_id, bot_id)
+        VALUES (p_user_id, p_organization_id, p_bot_id)
+    RETURNING
+        id INTO v_new_conversation_id;
+    RETURN v_new_conversation_id;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION data.get_user_messages(p_user_id uuid, p_conversation_id uuid)
+    RETURNS TABLE(
+        LIKE data.messages
+    )
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        m.*
+    FROM
+        data.messages m
+    WHERE
+        m.user_id = p_user_id
+        AND m.conversation_id = p_conversation_id;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION data.get_bots(p_organization_id uuid)
+    RETURNS TABLE(
+        LIKE data.bots
+    )
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        b.*
+    FROM
+        data.bots b
+    WHERE
+        b.organization_id = p_organization_id;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION data.get_bot(p_bot_id uuid, p_organization_id uuid)
+    RETURNS TABLE(
+        LIKE data.bots
+    )
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        b.*
+    FROM
+        data.bots b
+    WHERE
+        b.organization_id = p_organization_id
+        AND b.id = p_bot_id;
 END;
 $$
 LANGUAGE plpgsql;

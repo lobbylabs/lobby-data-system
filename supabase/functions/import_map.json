@@ -1,10 +1,10 @@
 {
   "imports": {
-    "std": "https://deno.land/std@0.213.0/",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js",
+    "shared/": "../../shared/",
+    "std": "https://deno.land/*std",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.3",
     "oak": "https://deno.land/x/oak@v12.6.2/mod.ts",
     "openai": "https://esm.sh/openai@4.25.0",
-    "js-tiktoken/lite": "https://esm.sh/js-tiktoken@1.0.8/lite",
-    "langchain/text_splitter": "https://esm.sh/langchain@0.1.6/text_splitter"
+    "@xenova/transformers": "https://esm.sh/@xenova/transformers@v2.14.2"
   }
 }
