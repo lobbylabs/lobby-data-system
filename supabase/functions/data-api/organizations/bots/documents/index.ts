@@ -15,15 +15,14 @@ documentsRouter
     const orgId = context.params.orgId;
     const botId = context.params.botId;
 
-    const { text, title, source_url, user_id } = await context.request.body()
+    const { text, title, source_url } = await context.request.body()
       .value;
-    console.log(text, title, source_url, user_id, orgId, botId);
+    console.log(text, title, source_url, orgId, botId);
     
     const chunks = await getChunks(text, 200);
     const { data: documentData, error: documentError } = await sbclient.rpc('create_document_with_chunks', {
 			p_bot_id:botId,
 			p_organization_id: orgId,
-			p_user_id_owner: user_id,
 			p_title: title,
 			p_source_url: source_url,
 			p_document_type: "text",

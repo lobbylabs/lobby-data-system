@@ -309,7 +309,7 @@ END IF;
 END
 $$;
 
-CREATE FUNCTION data.create_document_with_chunks(p_bot_id uuid, p_organization_id uuid, p_user_id uuid, p_title varchar(255), p_chunks_info json, p_author varchar(255) DEFAULT NULL, p_source_url varchar(2048) DEFAULT NULL, p_document_type varchar(100) DEFAULT NULL, p_content text DEFAULT NULL, p_content_size_kb integer DEFAULT NULL, p_content_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_content_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL, p_document_summary text DEFAULT NULL, p_document_summary_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_document_summary_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL, p_mime_type varchar(100) DEFAULT NULL)
+CREATE FUNCTION data.create_document_with_chunks(p_bot_id uuid, p_organization_id uuid, p_title varchar(255), p_chunks_info json, p_author varchar(255) DEFAULT NULL, p_source_url varchar(2048) DEFAULT NULL, p_document_type varchar(100) DEFAULT NULL, p_content text DEFAULT NULL, p_content_size_kb integer DEFAULT NULL, p_content_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_content_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL, p_document_summary text DEFAULT NULL, p_document_summary_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_document_summary_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL, p_mime_type varchar(100) DEFAULT NULL)
     RETURNS boolean
     AS $$
 DECLARE
@@ -333,9 +333,8 @@ BEGIN
             data.bots
         WHERE
             data.bots.id = p_bot_id
-            AND user_id_owner = p_user_id_owner
             AND organization_id = p_organization_id) THEN
-    RAISE EXCEPTION 'The specified bot does not belong to the user or organization.';
+    RAISE EXCEPTION 'The specified bot was not found in the given organization.';
 END IF;
     -- Insert the document record and get the generated id
     INSERT INTO data.documents(bot_id, organization_id, title, author, source_url, document_type, content, content_size_kb, content_embedding_ada_002, content_embedding_jina_v2_base_en, document_summary, document_summary_embedding_ada_002, document_summary_embedding_jina_v2_base_en, mime_type, num_chunks -- This field will be updated after chunks insertion
@@ -506,7 +505,7 @@ END;
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION data.get_user_conversation(p_user_id uuid, p_conversation_id)
+CREATE OR REPLACE FUNCTION data.get_user_conversation(p_user_id uuid, p_conversation_id uuid)
     RETURNS TABLE(
         LIKE data.conversations
     )
