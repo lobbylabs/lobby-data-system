@@ -47,7 +47,7 @@ conversationsRouter
   .get("/:convId", async (context) => {
     const { userId, convId } = context.params;
 
-    const { data, error } = await sbclient.rpc("create_conversation", {
+    const { data, error } = await sbclient.rpc("get_user_conversation", {
       p_user_id: userId,
       p_conversation_id: convId,
     });

@@ -6,7 +6,6 @@ const usersRouter = new Router();
 
 usersRouter
   .get("/", async (context) => {
-    console.log("TEST")
     const { data, error } = await sbclient.rpc("get_users_orgs", {
       p_organization_id: null,
     });
