@@ -1,8 +1,7 @@
 import {
   env,
   AutoTokenizer,
-  PreTrainedTokenizer,
-  //   GenerationConfig,
+  PreTrainedTokenizer
 } from "@xenova/transformers";
 import {getJinaEmbeddings} from "./openai.ts"
 
@@ -57,7 +56,7 @@ console.log(env);
 
 for (const [modelName, details] of Object.entries(tokenizerStore)) {
 
-  const tokenizerName = details.tokenizerConfig.tokenizer_class?.replace(/Fast$/, '') ?? 'PreTrainedTokenizer';
+  const tokenizerName: TOKENIZER_CLASS_MAPPING = details.tokenizerConfig.tokenizer_class?.replace(/Fast$/, '') ?? 'PreTrainedTokenizer';
 
   let cls = AutoTokenizer.TOKENIZER_CLASS_MAPPING[tokenizerName];
   if (!cls) {
