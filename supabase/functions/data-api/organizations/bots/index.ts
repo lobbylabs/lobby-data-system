@@ -6,8 +6,8 @@ const botsRouter = new Router();
 
 botsRouter
   .get("/", async (context) => {
-    console.log(context)
     const orgId = context.params.orgId;
+    console.log("orgId:", orgId)
     const { data, error } = await sbclient.rpc("get_bots", {
       p_organization_id: orgId
     });

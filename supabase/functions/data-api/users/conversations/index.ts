@@ -6,11 +6,10 @@ const conversationsRouter = new Router();
 
 conversationsRouter
   .get("/", async (context) => {
-    const userId = context.params.userId ?? null;
-    console.log(context);
+    const userId = context.params.userId;
 
     const { data, error } = await sbclient.rpc("get_user_conversations", {
-      p_user_id: userId ?? null,
+      p_user_id: userId,
     });
 
     console.log("error:", error);
@@ -25,12 +24,11 @@ conversationsRouter
     }
   })
   .post("/", async (context) => {
-    const { user_id, organization_id, bot_id } = await context.request.body()
-      .value;
-    console.log(user_id, organization_id, bot_id);
+    const userId = context.params.userId;
+    const { organization_id, bot_id } = await context.request.body().value;
 
     const { data, error } = await sbclient.rpc("create_conversation", {
-      p_user_id: user_id,
+      p_user_id: userId,
       p_organization_id: organization_id,
       p_bot_id: bot_id,
     });
@@ -46,9 +44,24 @@ conversationsRouter
       context.response.body = { data };
     }
   })
-  .get("/:convId", (context) => {
-    context.response.status = Status.NotImplemented;
-    context.response.body = `Fetching conversation with ID: ${context.params.convId}`;
+  .get("/:convId", async (context) => {
+    const { userId, convId } = context.params;
+
+    const { data, error } = await sbclient.rpc("create_conversation", {
+      p_user_id: userId,
+      p_conversation_id: convId,
+    });
+
+    console.log("error:", error);
+    console.log("data:", data);
+
+    if (error) {
+      context.response.status = Status.BadRequest;
+      context.response.body = { error };
+    } else {
+      context.response.status = Status.OK;
+      context.response.body = { data };
+    }
   })
   .put("/:convId", (context) => {
     context.response.status = Status.NotImplemented;

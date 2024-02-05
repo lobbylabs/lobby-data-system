@@ -73,7 +73,7 @@ usersRouter
     context.response.body = `Getting all organizations a user is in with ID: ${context.params.userId}`;
   })
   .use(
-    "/conversations/:userId",
+    "/:userId/conversations",
     conversationsRouter.routes(),
     conversationsRouter.allowedMethods()
   );

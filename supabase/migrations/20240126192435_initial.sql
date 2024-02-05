@@ -506,6 +506,24 @@ END;
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION data.get_user_conversation(p_user_id uuid, p_conversation_id)
+    RETURNS TABLE(
+        LIKE data.conversations
+    )
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        c.*
+    FROM
+        data.conversations c
+    WHERE
+        c.user_id = p_user_id
+        AND c.id = p_conversation_id;
+END;
+$$
+LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION data.create_conversation(p_user_id uuid, p_organization_id uuid, p_bot_id uuid)
     RETURNS uuid
     AS $$
