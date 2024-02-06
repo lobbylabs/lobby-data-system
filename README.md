@@ -17,6 +17,11 @@ brew install supabase/tap/supabase
 
 ## Configure Supabase CLI / Local Project
 
+# note: make sure to update supabase cli
+```
+brew upgrade supabase
+```
+
 ```
 supabase init
 
