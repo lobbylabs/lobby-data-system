@@ -1,5 +1,5 @@
 import { Router, Status } from "oak";
-import { sbclient } from "../../_shared/supabase.ts";
+import { sbclient } from "../../../_shared/supabase.ts";
 import { botsRouter } from "./bots/index.ts";
 
 const organizationsRouter = new Router();

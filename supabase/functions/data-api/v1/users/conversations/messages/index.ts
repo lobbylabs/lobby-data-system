@@ -5,9 +5,9 @@ import {
   Role,
   getNumTokens,
   Message,
-} from "../../../../_shared/utils.ts";
-import { openai, getJinaEmbeddings } from "../../../../_shared/openai.ts";
-import { sbclient } from "../../../../_shared/supabase.ts";
+} from "../../../../../_shared/utils.ts";
+import { openai, getJinaEmbeddings } from "../../../../../_shared/openai.ts";
+import { sbclient } from "../../../../../_shared/supabase.ts";
 
 const messagesRouter = new Router();
 

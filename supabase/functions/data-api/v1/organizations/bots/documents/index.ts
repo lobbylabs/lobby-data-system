@@ -1,7 +1,7 @@
 import { Router, Status } from "oak";
 import { chunksRouter } from "./chunks/index.ts";
-import { sbclient } from "../../../../_shared/supabase.ts";
-import { getChunks } from "../../../../_shared/utils.ts";
+import { sbclient } from "../../../../../_shared/supabase.ts";
+import { getChunks } from "../../../../../_shared/utils.ts";
 
 const documentsRouter = new Router();
 
