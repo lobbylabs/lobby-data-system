@@ -28,6 +28,5 @@ app.use(async (context, next) => {
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-
 await app.listen({ port: 8000 });
 console.log("Server is running on http://localhost:8000/");

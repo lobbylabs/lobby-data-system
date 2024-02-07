@@ -13,10 +13,10 @@ organizationsRouter
 
     if (error) {
       context.response.status = Status.BadRequest;
-      context.response.body = { error };
+      context.response.body = { error: error };
     } else {
       context.response.status = Status.OK;
-      context.response.body = { data };
+      context.response.body = { data: data };
     }
   })
   .post("/", (context) => {
@@ -48,10 +48,10 @@ organizationsRouter
 
     if (error) {
       context.response.status = Status.BadRequest;
-      context.response.body = { error };
+      context.response.body = { error: error };
     } else {
       context.response.status = Status.OK;
-      context.response.body = { data };
+      context.response.body = { data: data };
     }
   })
   .use("/:orgId/bots", botsRouter.routes(), botsRouter.allowedMethods());

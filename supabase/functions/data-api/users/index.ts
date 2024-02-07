@@ -15,10 +15,10 @@ usersRouter
 
     if (error) {
       context.response.status = Status.BadRequest;
-      context.response.body = { error };
+      context.response.body = { error: error };
     } else {
       context.response.status = Status.OK;
-      context.response.body = { data };
+      context.response.body = { data: data };
     }
   })
   .post("/", async (context) => {
@@ -34,10 +34,10 @@ usersRouter
 
     if (error) {
       context.response.status = Status.BadRequest;
-      context.response.body = { error };
+      context.response.body = { error: error };
     } else {
       context.response.status = Status.OK;
-      context.response.body = { data };
+      context.response.body = { data: data };
     }
     // context.response.body = "Creating a new user.";
   })

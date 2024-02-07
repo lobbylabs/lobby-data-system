@@ -67,10 +67,10 @@ for (const [modelName, details] of Object.entries(tokenizerStore)) {
 
 
   if (details.tokenizer) {
-    console.log(`Tokenizer for ${modelName} is available.`);
+    console.log(`Tokenizer is available for ${modelName}`);
     // Perform operations with details.tokenizer if needed...
   } else {
-    console.log(`Tokenizer for ${modelName} failed to initialize.`);
+    console.log(`Tokenizer failed to initialize for ${modelName}`);
   }
 
 
@@ -81,10 +81,17 @@ enum Role {
   Assistant = "assistant",
 }
 
-type Conversation = {
+class Message {
   role: Role;
   content: string;
-}[]
+  
+  constructor(role: Role, content: string) {
+    this.role = role;
+    this.content = content;
+  }
+}
+
+type Conversation = Message[]
 
 function getNumTokens(model: Model, input: string | Conversation): number {
   let tokenizerEntry = tokenizerStore[model];
@@ -107,11 +114,11 @@ function getNumTokens(model: Model, input: string | Conversation): number {
   }
 };
 
-function validCovnersation(conversation: any[]): boolean {
-  return conversation.every(item => 
-    Object.values(Role).includes(item.role)
-  );
-}
+// function validCovnersation(conversation: Conversation): boolean {
+//   return conversation.every(item => 
+//     Object.values(Role).includes(item.role)
+//   );
+// }
 
 type Chunk = {
   chunk_content_embedding_jina_v2_base_en: number[] | null,
@@ -167,5 +174,5 @@ async function getChunks(text: string, tokenLen: number): Promise<Chunk[]> {
 
 
 
-export { getNumTokens, validCovnersation, getChunks, Model, Role };
+export { getNumTokens, getChunks, Model, Role, Message };
 export type { Conversation, Chunk };

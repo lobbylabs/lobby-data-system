@@ -17,12 +17,16 @@ ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA data GRANT ALL ON TABLES TO
 -- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA data GRANT ALL ON SEQUENCES TO service_role;
 -- Create tables
 CREATE TABLE data.users(
-    id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid()
+    id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp NOT NULL DEFAULT now()
 );
 
 CREATE TABLE data.organizations(
     id uuid NOT NULL PRIMARY KEY UNIQUE DEFAULT gen_random_uuid(),
     user_id_owner uuid NOT NULL,
+    created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp NOT NULL DEFAULT now(),
     CONSTRAINT fk_user_id_owner FOREIGN KEY (user_id_owner) REFERENCES data.users(id)
 );
 
@@ -57,8 +61,8 @@ CREATE INDEX ON data.bots USING hnsw(bot_summary_embedding_jina_v2_base_en vecto
 CREATE TABLE data.conversations(
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL,
-    organization_id uuid NOT NULL,
-    bot_id uuid NOT NULL,
+    organization_id uuid NULL,
+    bot_id uuid NULL,
     conversation_summary text NULL,
     conversation_summary_embedding_ada_002 extensions.vector(1536) NULL,
     conversation_summary_embedding_jina_v2_base_en extensions.vector(768) NULL,
@@ -88,6 +92,7 @@ CREATE TABLE data.messages(
     message_content_embedding_ada_002 extensions.vector(1536) NULL,
     message_content_embedding_jina_v2_base_en extensions.vector(768) NULL,
     created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp NOT NULL DEFAULT now(),
     CONSTRAINT messages_pkey PRIMARY KEY (user_id, id),
     CONSTRAINT fk_organization FOREIGN KEY (organization_id) REFERENCES data.organizations(id),
     CONSTRAINT fk_bot FOREIGN KEY (organization_id, bot_id) REFERENCES data.bots(organization_id, id),
@@ -118,7 +123,7 @@ CREATE TABLE data.documents(
     mime_type varchar(100) NULL,
     num_chunks integer NOT NULL,
     created_at timestamp NOT NULL DEFAULT now(),
-    last_updated timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp NOT NULL DEFAULT now(),
     CONSTRAINT documents_pkey PRIMARY KEY (bot_id, id),
     CONSTRAINT fk_organization FOREIGN KEY (organization_id) REFERENCES data.organizations(id),
     CONSTRAINT fk_bot FOREIGN KEY (organization_id, bot_id) REFERENCES data.bots(organization_id, id)
@@ -144,6 +149,8 @@ CREATE TABLE data.document_chunks(
     chunk_content_embedding_jina_v2_base_en extensions.vector(768) NULL,
     prev_chunk uuid NULL,
     next_chunk uuid NULL,
+    created_at timestamp NOT NULL DEFAULT now(),
+    updated_at timestamp NOT NULL DEFAULT now(),
     CONSTRAINT document_chunks_pkey PRIMARY KEY (bot_id, id),
     CONSTRAINT fk_organization FOREIGN KEY (organization_id) REFERENCES data.organizations(id),
     CONSTRAINT fk_bot FOREIGN KEY (organization_id, bot_id) REFERENCES data.bots(organization_id, id),
@@ -185,7 +192,7 @@ CREATE INDEX ON data.document_chunks USING hnsw(chunk_content_embedding_jina_v2_
 --   ALL ON TABLE data.users TO service_role;
 -- GRANT
 --   ALL ON TABLE data.organizations TO service_role;
--- Create Functions
+-- CREATE OR REPLACE FUNCTIONs
 CREATE OR REPLACE FUNCTION data.on_insert_bot()
     RETURNS TRIGGER
     AS $$
@@ -205,7 +212,7 @@ CREATE TRIGGER trigger_for_bots_partition
     FOR EACH ROW
     EXECUTE PROCEDURE data.on_insert_bot();
 
-CREATE FUNCTION data.create_bot(p_organization_id uuid, p_user_id_owner uuid, p_system_prompt text DEFAULT '')
+CREATE OR REPLACE FUNCTION data.create_bot(p_organization_id uuid, p_user_id_owner uuid, p_system_prompt text DEFAULT '', p_overwrite_id uuid DEFAULT NULL)
     RETURNS SETOF data.bots
     AS $$
 DECLARE
@@ -213,18 +220,24 @@ DECLARE
 BEGIN
     EXECUTE format('CREATE TABLE IF NOT EXISTS data.%I PARTITION OF data.bots FOR VALUES IN (%L);', _partition_name, p_organization_id);
     -- Use the RETURN QUERY to execute the INSERT and return the result
-    RETURN QUERY INSERT INTO data.bots(organization_id, user_id_owner, system_prompt)
-        VALUES (p_organization_id, p_user_id_owner, p_system_prompt)
-    RETURNING
-        *;
-    -- Asterisk (*) returns all columns of the inserted row
+    IF p_overwrite_id IS NULL THEN
+        RETURN QUERY INSERT INTO data.bots(organization_id, user_id_owner, system_prompt)
+            VALUES (p_organization_id, p_user_id_owner, p_system_prompt)
+        RETURNING
+            *;
+    ELSE
+        RETURN QUERY INSERT INTO data.bots(id, organization_id, user_id_owner, system_prompt)
+            VALUES (p_overwrite_id, p_organization_id, p_user_id_owner, p_system_prompt)
+        RETURNING
+            *;
+    END IF;
 END;
 $$
 LANGUAGE plpgsql
 SECURITY DEFINER;
 
 --Initialize User Messages Partition
-CREATE FUNCTION data.initialize_user_data_partitions(p_user_id uuid)
+CREATE OR REPLACE FUNCTION data.initialize_user_data_partitions(p_user_id uuid)
     RETURNS void
     AS $$
 BEGIN
@@ -235,7 +248,7 @@ $$
 LANGUAGE plpgsql
 SECURITY DEFINER;
 
-CREATE FUNCTION data.document_chunk_similarity_search(p_organization_id uuid, p_bot_id uuid, p_user_id uuid, p_threshold float, p_k int, p_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL)
+CREATE OR REPLACE FUNCTION data.document_chunk_similarity_search(p_organization_id uuid, p_bot_id uuid, p_user_id uuid, p_threshold float, p_k int, p_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL)
     RETURNS TABLE(
         id uuid,
         bot_id uuid,
@@ -309,8 +322,8 @@ END IF;
 END
 $$;
 
-CREATE FUNCTION data.create_document_with_chunks(p_bot_id uuid, p_organization_id uuid, p_title varchar(255), p_chunks_info json, p_author varchar(255) DEFAULT NULL, p_source_url varchar(2048) DEFAULT NULL, p_document_type varchar(100) DEFAULT NULL, p_content text DEFAULT NULL, p_content_size_kb integer DEFAULT NULL, p_content_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_content_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL, p_document_summary text DEFAULT NULL, p_document_summary_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_document_summary_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL, p_mime_type varchar(100) DEFAULT NULL)
-    RETURNS boolean
+CREATE OR REPLACE FUNCTION data.create_document_with_chunks(p_bot_id uuid, p_organization_id uuid, p_title varchar(255), p_chunks_info json, p_author varchar(255) DEFAULT NULL, p_source_url varchar(2048) DEFAULT NULL, p_document_type varchar(100) DEFAULT NULL, p_content text DEFAULT NULL, p_content_size_kb integer DEFAULT NULL, p_content_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_content_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL, p_document_summary text DEFAULT NULL, p_document_summary_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_document_summary_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL, p_mime_type varchar(100) DEFAULT NULL, p_overwrite_id uuid DEFAULT NULL)
+    RETURNS SETOF data.documents
     AS $$
 DECLARE
     _doc_id uuid;
@@ -337,12 +350,21 @@ BEGIN
     RAISE EXCEPTION 'The specified bot was not found in the given organization.';
 END IF;
     -- Insert the document record and get the generated id
-    INSERT INTO data.documents(bot_id, organization_id, title, author, source_url, document_type, content, content_size_kb, content_embedding_ada_002, content_embedding_jina_v2_base_en, document_summary, document_summary_embedding_ada_002, document_summary_embedding_jina_v2_base_en, mime_type, num_chunks -- This field will be updated after chunks insertion
+    IF p_overwrite_id IS NULL THEN
+        INSERT INTO data.documents(bot_id, organization_id, title, author, source_url, document_type, content, content_size_kb, content_embedding_ada_002, content_embedding_jina_v2_base_en, document_summary, document_summary_embedding_ada_002, document_summary_embedding_jina_v2_base_en, mime_type, num_chunks -- This field will be updated after chunks insertion
 )
-        VALUES (p_bot_id, p_organization_id, p_title, p_author, p_source_url, p_document_type, p_content, p_content_size_kb, p_content_embedding_ada_002, p_content_embedding_jina_v2_base_en, p_document_summary, p_document_summary_embedding_ada_002, p_document_summary_embedding_jina_v2_base_en, p_mime_type, 0 -- Initialize with 0, will update later
+            VALUES (p_bot_id, p_organization_id, p_title, p_author, p_source_url, p_document_type, p_content, p_content_size_kb, p_content_embedding_ada_002, p_content_embedding_jina_v2_base_en, p_document_summary, p_document_summary_embedding_ada_002, p_document_summary_embedding_jina_v2_base_en, p_mime_type, 0 -- Initialize with 0, will update later
 )
-    RETURNING
-        data.documents.id INTO _doc_id;
+        RETURNING
+            data.documents.id INTO _doc_id;
+    ELSE
+        INSERT INTO data.documents(id, bot_id, organization_id, title, author, source_url, document_type, content, content_size_kb, content_embedding_ada_002, content_embedding_jina_v2_base_en, document_summary, document_summary_embedding_ada_002, document_summary_embedding_jina_v2_base_en, mime_type, num_chunks -- This field will be updated after chunks insertion
+)
+            VALUES (p_overwrite_id, p_bot_id, p_organization_id, p_title, p_author, p_source_url, p_document_type, p_content, p_content_size_kb, p_content_embedding_ada_002, p_content_embedding_jina_v2_base_en, p_document_summary, p_document_summary_embedding_ada_002, p_document_summary_embedding_jina_v2_base_en, p_mime_type, 0 -- Initialize with 0, will update later
+)
+        RETURNING
+            data.documents.id INTO _doc_id;
+    END IF;
     -- Loop through each chunk in the p_chunks_info and insert them
     FOR _chunk IN
     SELECT
@@ -396,14 +418,38 @@ END LOOP;
         num_chunks = _num_chunks
     WHERE
         data.documents.id = _doc_id;
-    RETURN TRUE;
+    RETURN QUERY
+    SELECT
+        *
+    FROM
+        data.documents
+    WHERE
+        data.documents.id = _doc_id;
     END;
 
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION data.get_documents(p_bot_id uuid, p_organization_id uuid)
+    RETURNS SETOF data.documents
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        *
+    FROM
+        data.documents
+    WHERE
+        data.documents.bot_id = p_bot_id
+        AND data.documents.organization_id = p_organization_id
+    ORDER BY
+        data.documents.updated_at DESC;
+END;
+$$
+LANGUAGE plpgsql;
+
 -- creates a new user and org or adds new user to existing org if org id is provided
-CREATE FUNCTION data.create_user(p_organization_id uuid)
+CREATE OR REPLACE FUNCTION data.create_user(p_organization_id uuid DEFAULT NULL, p_overwrite_user_id uuid DEFAULT NULL, p_overwrite_org_id uuid DEFAULT NULL)
     RETURNS TABLE(
         LIKE data.organization_members
     )
@@ -411,7 +457,6 @@ CREATE FUNCTION data.create_user(p_organization_id uuid)
 DECLARE
     _new_user_id uuid;
     _new_org_id uuid;
-    _test_test text;
 BEGIN
     IF p_organization_id IS NOT NULL THEN
         -- Check if organization exists
@@ -430,17 +475,33 @@ BEGIN
     END IF;
 END IF;
     -- Create the new user
-    INSERT INTO data.users(id)
-        VALUES (DEFAULT)
-    RETURNING
-        data.users.id INTO _new_user_id;
+    IF p_overwrite_user_id IS NULL THEN
+        INSERT INTO data.users(id)
+            VALUES (DEFAULT)
+        RETURNING
+            data.users.id INTO _new_user_id;
+    ELSE
+        INSERT INTO data.users(id)
+            VALUES (p_overwrite_user_id)
+        RETURNING
+            data.users.id INTO _new_user_id;
+    END IF;
+    RAISE NOTICE '_new_user_id(%)', _new_user_id;
     -- If we don't have an org id we need to create a new org with the new user as the owner
     IF _new_org_id IS NULL THEN
-        INSERT INTO data.organizations(user_id_owner)
-            VALUES (_new_user_id)
-        RETURNING
-            data.organizations.id INTO _new_org_id;
+        IF p_overwrite_org_id IS NULL THEN
+            INSERT INTO data.organizations(user_id_owner)
+                VALUES (_new_user_id)
+            RETURNING
+                data.organizations.id INTO _new_org_id;
+        ELSE
+            INSERT INTO data.organizations(id, user_id_owner)
+                VALUES (p_overwrite_org_id, _new_user_id)
+            RETURNING
+                data.organizations.id INTO _new_org_id;
+        END IF;
     END IF;
+    RAISE NOTICE '_new_org_id(%)', _new_org_id;
     PERFORM
         data.initialize_user_data_partitions(p_user_id := _new_user_id);
     -- Now we can create an entry in organization_members with the user and organization id
@@ -480,7 +541,9 @@ BEGIN
         WHERE
             om.organization_id = p_organization_id
         GROUP BY
-            u.id;
+            u.id
+        ORDER BY
+            u.updated_at DESC;
     END IF;
 END;
 $$
@@ -523,25 +586,27 @@ END;
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION data.create_conversation(p_user_id uuid, p_organization_id uuid, p_bot_id uuid)
-    RETURNS uuid
+CREATE OR REPLACE FUNCTION data.create_conversation(p_user_id uuid, p_organization_id uuid DEFAULT NULL, p_bot_id uuid DEFAULT NULL, p_overwrite_id uuid DEFAULT NULL)
+    RETURNS SETOF data.conversations
     AS $$
-DECLARE
-    v_new_conversation_id uuid;
 BEGIN
-    INSERT INTO data.conversations(user_id, organization_id, bot_id)
-        VALUES (p_user_id, p_organization_id, p_bot_id)
-    RETURNING
-        id INTO v_new_conversation_id;
-    RETURN v_new_conversation_id;
+    IF p_overwrite_id IS NULL THEN
+        RETURN QUERY INSERT INTO data.conversations(user_id, organization_id, bot_id)
+            VALUES(p_user_id, p_organization_id, p_bot_id)
+        RETURNING
+            *;
+    ELSE
+        RETURN QUERY INSERT INTO data.conversations(id, user_id, organization_id, bot_id)
+            VALUES(p_overwrite_id, p_user_id, p_organization_id, p_bot_id)
+        RETURNING
+            *;
+    END IF;
 END;
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION data.get_user_messages(p_user_id uuid, p_conversation_id uuid)
-    RETURNS TABLE(
-        LIKE data.messages
-    )
+CREATE OR REPLACE FUNCTION data.get_user_messages(p_user_id uuid, p_conversation_id uuid, p_num_messages integer DEFAULT NULL)
+    RETURNS SETOF data.messages
     AS $$
 BEGIN
     RETURN QUERY
@@ -551,32 +616,16 @@ BEGIN
         data.messages m
     WHERE
         m.user_id = p_user_id
-        AND m.conversation_id = p_conversation_id;
+        AND m.conversation_id = p_conversation_id
+    ORDER BY
+        m.message_index ASC
+    LIMIT p_num_messages;
 END;
 $$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION data.get_bots(p_organization_id uuid)
-    RETURNS TABLE(
-        LIKE data.bots
-    )
-    AS $$
-BEGIN
-    RETURN QUERY
-    SELECT
-        b.*
-    FROM
-        data.bots b
-    WHERE
-        b.organization_id = p_organization_id;
-END;
-$$
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION data.get_bot(p_bot_id uuid, p_organization_id uuid)
-    RETURNS TABLE(
-        LIKE data.bots
-    )
+    RETURNS SETOF data.bots
     AS $$
 BEGIN
     RETURN QUERY
@@ -586,7 +635,51 @@ BEGIN
         data.bots b
     WHERE
         b.organization_id = p_organization_id
+    ORDER BY
+        b.updated_at DESC;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION data.get_bot(p_bot_id uuid, p_organization_id uuid)
+    RETURNS data.bots
+    AS $$
+DECLARE
+    result data.bots;
+BEGIN
+    SELECT
+        b.* INTO result
+    FROM
+        data.bots b
+    WHERE
+        b.organization_id = p_organization_id
         AND b.id = p_bot_id;
+    RETURN result;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION data.create_message(p_user_id uuid, p_organization_id uuid, p_bot_id uuid, p_conversation_id uuid, p_message_type varchar, p_message_content text, p_message_content_embedding_jina_v2_base_en extensions.vector)
+    RETURNS SETOF data.messages
+    AS $$
+DECLARE
+    -- Variable to hold the next message_index for the new message
+    _next_message_index bigint;
+BEGIN
+    -- Calculate the next message_index for the new message in the conversation
+    SELECT
+        COALESCE(MAX(data.messages.message_index), 0) + 1 INTO _next_message_index
+    FROM
+        data.messages
+    WHERE
+        data.messages.user_id = p_user_id
+        AND data.messages.conversation_id = p_conversation_id;
+    RAISE NOTICE '_next_message_index(%)', _next_message_index;
+    -- Insert the new message into the table
+    RETURN QUERY INSERT INTO data.messages(user_id, organization_id, bot_id, conversation_id, message_type, message_index, message_content, message_content_embedding_jina_v2_base_en)
+        VALUES (p_user_id, p_organization_id, p_bot_id, p_conversation_id, p_message_type, _next_message_index, p_message_content, p_message_content_embedding_jina_v2_base_en)
+    RETURNING
+        *;
 END;
 $$
 LANGUAGE plpgsql;
