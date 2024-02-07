@@ -9,7 +9,7 @@ BEGIN
   PERFORM
     data.create_user(p_overwrite_user_id := _user_id, p_overwrite_org_id := _organization_id);
   PERFORM
-    data.create_bot(p_organization_id := _organization_id, p_user_id_owner := _user_id, p_overwrite_id := _bot_id, p_system_prompt := 'you are a helpful bot that talks like a pirate!');
+    data.create_bot(p_organization_id := _organization_id, p_user_id_owner := _user_id, p_overwrite_id := _bot_id, p_system_prompt := 'you are a helpful assistant that uses the provided context to answer questions. If the context doesnt contain an answer to the question, tell the user you dont know');
   PERFORM
     data.create_conversation(p_user_id := _user_id, p_organization_id := _organization_id, p_bot_id := _bot_id, p_overwrite_id := _conversation_id);
   PERFORM

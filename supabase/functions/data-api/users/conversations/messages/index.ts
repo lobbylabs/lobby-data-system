@@ -135,7 +135,7 @@ messagesRouter
       await getJinaEmbeddings([newUserMessage.content])
     )[0];
 
-    // grab system message and context from bot
+    // grab system message and other info from bot
     console.log("Getting bot");
     const { data: botData, error: botError } = await sbclient.rpc("get_bot", {
       p_organization_id: organization_id,
@@ -150,11 +150,47 @@ messagesRouter
       return;
     }
 
+    console.log("Getting context");
+    // grab context from bot
+    console.log("Getting bot");
+    const { data: contextData, error: contextError } = await sbclient.rpc(
+      "document_chunk_similarity_search",
+      {
+        p_organization_id: organization_id,
+        p_bot_id: bot_id,
+        p_user_id: userId,
+        p_threshold: 0.0,
+        p_k: 5,
+        p_embedding_jina_v2_base_en: newUserMessageContentEmbedding,
+      }
+    );
+
+    if (botError) {
+      context.response.status = Status.BadRequest;
+      context.response.body = { error: botError };
+      return;
+    }
+
+    // const systemMessage = new Message(Role.System, botData.system_prompt);
+    console.log("contextData:", contextData);
+
     const systemMessage = new Message(Role.System, botData.system_prompt);
     // console.log("systemMessage:", systemMessage);
 
-    console.log("Getting context");
-    // GET CONTEXT
+    const contextPrefix = 'context:\n';
+    let contextText = '';
+
+    // Generate the context text from the contextData
+    for (const item of contextData) {
+      contextText += `${item.chunk_content}\n\n`;
+    }
+
+    if (contextText) {
+      // Remove the last two newlines
+      contextText = contextText.slice(0, -2);
+      // Prepend the context prefix and append everything to the existing message content
+      systemMessage.content += `\n${contextPrefix}${contextText}`;
+    }
 
     console.log("Constructing conversation");
     const conversation: Conversation = [
@@ -164,7 +200,7 @@ messagesRouter
     ];
     const conversation_json = JSON.parse(JSON.stringify(conversation));
 
-    // console.log("conversation:", conversation);
+    console.log("conversation:", conversation);
 
     // console.log("HERE");
 
@@ -348,7 +384,7 @@ messagesRouter
         controller.close(); // Close the stream once all data is sent
         console.log("... All data packets sent");
         console.log("Stream processing completed");
-        console.log("Usage:", finalResponse.usage)
+        console.log("Usage:", finalResponse.usage);
       },
     });
 

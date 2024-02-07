@@ -293,7 +293,7 @@ END IF;
             AND data.document_chunks.organization_id = p_organization_id
             AND 1 -(data.document_chunks.chunk_content_embedding_ada_002 <=> p_embedding_ada_002) > p_threshold
         ORDER BY
-            similarity ASC
+            similarity DESC
         LIMIT p_k;
     ELSIF p_embedding_jina_v2_base_en IS NOT NULL THEN
         -- Perform the main query
@@ -314,7 +314,7 @@ END IF;
             AND data.document_chunks.organization_id = p_organization_id
             AND 1 -(data.document_chunks.chunk_content_embedding_jina_v2_base_en <=> p_embedding_jina_v2_base_en) > p_threshold
         ORDER BY
-            similarity ASC
+            similarity DESC
         LIMIT p_k;
     ELSE
         RAISE EXCEPTION 'Invalid vector type';
