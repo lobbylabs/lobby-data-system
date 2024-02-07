@@ -172,8 +172,8 @@ messagesRouter
       Model.cognitivecomputations_dolphin_2_7_mixtral_8x7b,
       conversation_json
     );
-    // console.log("num_tokens_expected:");
-    // console.log(num_tokens);
+    console.log("num_input_tokens_expected:");
+    console.log(num_tokens);
 
     // save the new user message
     const { data: createNewUserMessageData, error: createNewUserMessageError } =
@@ -349,6 +349,8 @@ messagesRouter
         controller.close(); // Close the stream once all data is sent
         console.log("... All data packets sent");
         console.log("Stream processing completed");
+        console.log("Usage:")
+        console.log(finalResponse.usage)
       },
     });
 
