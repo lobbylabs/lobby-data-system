@@ -7,11 +7,11 @@ meta {
 post {
   url: {{SUPABASE_API_URL}}/functions/v1/data-api/v1/users/{{user_id}}/conversations/{{conversation_id}}/messages
   body: json
-  auth: bearer
+  auth: none
 }
 
 auth:bearer {
-  token: {{SUPABASE_SERVICE_ROLE_KEY}}
+  token: 
 }
 
 body:json {
