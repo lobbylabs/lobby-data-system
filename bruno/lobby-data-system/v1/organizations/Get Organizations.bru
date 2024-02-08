@@ -1,0 +1,15 @@
+meta {
+  name: Get Organizations
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{SUPABASE_API_URL}}/functions/v1/data-api/v1/organizations
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{SUPABASE_SERVICE_ROLE_KEY}}
+}

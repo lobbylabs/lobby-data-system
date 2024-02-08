@@ -1,12 +1,11 @@
 import { Router, Status } from "oak";
-import { sbclient } from "../../../_shared/supabase.ts";
 import { conversationsRouter } from "./conversations/index.ts";
 
 const usersRouter = new Router();
 
 usersRouter
   .get("/", async (context) => {
-    const { data, error } = await sbclient.rpc("get_users_orgs", {
+    const { data, error } = await context.state.sbclient.rpc("get_users_orgs", {
       p_organization_id: null,
     });
 
@@ -25,7 +24,7 @@ usersRouter
     const body = await context.request.body().value;
     console.log(body);
 
-    const { data, error } = await sbclient.rpc("create_user", {
+    const { data, error } = await context.state.sbclient.rpc("create_user", {
       p_organization_id: body.organization_id ?? null,
     });
 

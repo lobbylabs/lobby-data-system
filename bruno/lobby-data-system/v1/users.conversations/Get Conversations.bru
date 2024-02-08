@@ -1,0 +1,26 @@
+meta {
+  name: Get Conversations
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{SUPABASE_API_URL}}/functions/v1/data-api/v1/users/{{user_id}}/conversations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{SUPABASE_SERVICE_ROLE_KEY}}
+}
+
+body:json {
+  {
+      "organization_id": "{{organization_id}}",
+      "bot_id": "{{bot_id}}"
+  }
+}
+
+vars:pre-request {
+  user_id: 
+}

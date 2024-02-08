@@ -1,4 +1,4 @@
-import { Router, ServerSentEvent, Status } from "oak";
+import { Router, Status } from "oak";
 import {
   Conversation,
   Model,
@@ -7,7 +7,6 @@ import {
   Message,
 } from "../../../../../_shared/utils.ts";
 import { openai, getJinaEmbeddings } from "../../../../../_shared/openai.ts";
-import { sbclient } from "../../../../../_shared/supabase.ts";
 
 const messagesRouter = new Router();
 
@@ -17,10 +16,13 @@ messagesRouter
     const convId = context.params.convId;
     // console.log(userId, convId);
     console.log("Getting conversation");
-    const { data, error } = await sbclient.rpc("get_user_messages", {
-      p_user_id: userId,
-      p_conversation_id: convId,
-    });
+    const { data, error } = await context.state.sbclient.rpc(
+      "get_user_messages",
+      {
+        p_user_id: userId,
+        p_conversation_id: convId,
+      }
+    );
 
     // console.log("error:", error);
     // console.log("data:", data);
@@ -57,7 +59,7 @@ messagesRouter
     // Get the conversation record for this request
     console.log("Getting conversation");
     const { data: conversationData, error: conversationError } =
-      await sbclient.rpc("get_user_conversation", {
+      await context.state.sbclient.rpc("get_user_conversation", {
         p_user_id: userId,
         p_conversation_id: convId,
       });
@@ -103,14 +105,12 @@ messagesRouter
 
     // get the conversation messages to use in the
     console.log("Getting message history");
-    const { data: messagesData, error: messagesError } = await sbclient.rpc(
-      "get_user_messages",
-      {
+    const { data: messagesData, error: messagesError } =
+      await context.state.sbclient.rpc("get_user_messages", {
         p_user_id: userId,
         p_conversation_id: convId,
         p_num_messages: num_message_history,
-      }
-    );
+      });
 
     // console.log("error:", messagesError);
     // console.log("data:", messagesData);
@@ -137,10 +137,13 @@ messagesRouter
 
     // grab system message and other info from bot
     console.log("Getting bot");
-    const { data: botData, error: botError } = await sbclient.rpc("get_bot", {
-      p_organization_id: organization_id,
-      p_bot_id: bot_id,
-    });
+    const { data: botData, error: botError } = await context.state.sbclient.rpc(
+      "get_bot",
+      {
+        p_organization_id: organization_id,
+        p_bot_id: bot_id,
+      }
+    );
     // console.log("error:", botError);
     // console.log("data:", botData);
 
@@ -153,17 +156,15 @@ messagesRouter
     console.log("Getting context");
     // grab context from bot
     console.log("Getting bot");
-    const { data: contextData, error: contextError } = await sbclient.rpc(
-      "document_chunk_similarity_search",
-      {
+    const { data: contextData, error: contextError } =
+      await context.state.sbclient.rpc("document_chunk_similarity_search", {
         p_organization_id: organization_id,
         p_bot_id: bot_id,
         p_user_id: userId,
         p_threshold: 0.0,
         p_k: 5,
         p_embedding_jina_v2_base_en: newUserMessageContentEmbedding,
-      }
-    );
+      });
 
     if (botError) {
       context.response.status = Status.BadRequest;
@@ -177,8 +178,8 @@ messagesRouter
     const systemMessage = new Message(Role.System, botData.system_prompt);
     // console.log("systemMessage:", systemMessage);
 
-    const contextPrefix = 'context:\n';
-    let contextText = '';
+    const contextPrefix = "context:\n";
+    let contextText = "";
 
     // Generate the context text from the contextData
     for (const item of contextData) {
@@ -212,7 +213,7 @@ messagesRouter
 
     // save the new user message
     const { data: createNewUserMessageData, error: createNewUserMessageError } =
-      await sbclient.rpc("create_message", {
+      await context.state.sbclient.rpc("create_message", {
         p_user_id: userId,
         p_organization_id: organization_id,
         p_bot_id: bot_id,
@@ -312,7 +313,7 @@ messagesRouter
         let {
           data: createNewAssistantMessageData,
           error: createNewAssistantMessageError,
-        } = await sbclient.rpc("create_message", {
+        } = await context.state.sbclient.rpc("create_message", {
           p_user_id: userId,
           p_organization_id: organization_id,
           p_bot_id: bot_id,
@@ -344,7 +345,7 @@ messagesRouter
 
         if (full_conversation) {
           const { data: fullConvoData, error: fullConvoError } =
-            await sbclient.rpc("get_user_messages", {
+            await context.state.sbclient.rpc("get_user_messages", {
               p_user_id: userId,
               p_conversation_id: convId,
             });

@@ -1,0 +1,19 @@
+meta {
+  name: Get User
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{SUPABASE_API_URL}}/functions/v1/data-api/v1/users/{{user_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{SUPABASE_SERVICE_ROLE_KEY}}
+}
+
+vars:pre-request {
+  ~user_id: 
+}

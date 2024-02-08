@@ -1,0 +1,19 @@
+meta {
+  name: Create User (new org)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{SUPABASE_API_URL}}/functions/v1/data-api/v1/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{SUPABASE_SERVICE_ROLE_KEY}}
+}
+
+body:json {
+  {}
+}

@@ -1,0 +1,20 @@
+meta {
+  name: Get Bots
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{SUPABASE_API_URL}}/functions/v1/data-api/v1/organizations/{{organization_id}}/bots
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{SUPABASE_SERVICE_ROLE_KEY}}
+}
+
+vars:pre-request {
+  ~user_id: 
+  ~organization_id: 
+}

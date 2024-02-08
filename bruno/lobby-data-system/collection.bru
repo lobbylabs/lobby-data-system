@@ -1,0 +1,20 @@
+auth {
+  mode: bearer
+}
+
+auth:bearer {
+  token: {{env_supabase_service_role_key}}
+}
+
+script:pre-request {
+  for (const col_var of Object.keys(bru.collectionVariables)) {
+    const req_var = req.req.vars.req?.find(item => item.name).enabled;
+    const envVarVal = bru.getEnvVar(col_var);
+    if (!req_var && envVarVal) {
+      bru.setVar(col_var,envVarVal);
+    } else if (!req_var) {
+      bru.setVar(col_var,null);
+    }
+  }
+  console.log(process)
+}

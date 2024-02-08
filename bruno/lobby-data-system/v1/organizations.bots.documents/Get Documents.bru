@@ -1,0 +1,20 @@
+meta {
+  name: Get Documents
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{SUPABASE_API_URL}}/functions/v1/data-api/v1/organizations/{{organization_id}}/bots/{{bot_id}}/documents
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{SUPABASE_SERVICE_ROLE_KEY}}
+}
+
+vars:pre-request {
+  ~organization_id: 
+  ~bot_id: 
+}
