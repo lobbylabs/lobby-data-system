@@ -1,0 +1,740 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "lobby-data-system",
+        "description": "",
+        "version": "1.0.0"
+    },
+    "tags": [
+        {
+            "name": "v1"
+        },
+        {
+            "name": "v1/Organizations"
+        },
+        {
+            "name": "v1/Bots"
+        },
+        {
+            "name": "v1/Documents"
+        },
+        {
+            "name": "v1/Users"
+        },
+        {
+            "name": "v1/Conversations"
+        },
+        {
+            "name": "v1/Messages"
+        }
+    ],
+    "paths": {
+        "/functions/v1/data-api/v1/organizations/{organization_id}/bots/{bot_id}/documents": {
+            "get": {
+                "summary": "documents",
+                "deprecated": false,
+                "description": "",
+                "operationId": "get_documents",
+                "tags": [
+                    "v1/Documents"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bot_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_bot_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "summary": "documents",
+                "deprecated": false,
+                "description": "",
+                "operationId": "post_documents",
+                "tags": [
+                    "v1/Documents"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bot_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_bot_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "source_url": {
+                                        "type": "string"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "source_url",
+                                    "text",
+                                    "title"
+                                ]
+                            },
+                            "example": {
+                                "source_url": "source_url",
+                                "text": "{{test_text_data}}",
+                                "title": "Document Test"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/organizations/{organization_id}/bots": {
+            "get": {
+                "summary": "bots",
+                "deprecated": false,
+                "description": "",
+                "operationId": "get_bots",
+                "tags": [
+                    "v1/Bots"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "summary": "bots",
+                "deprecated": false,
+                "description": "",
+                "operationId": "post_bots",
+                "tags": [
+                    "v1/Bots"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "system_prompt": {
+                                        "type": "string"
+                                    },
+                                    "user_id_owner": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "required": [
+                                    "system_prompt",
+                                    "user_id_owner"
+                                ]
+                            },
+                            "example": {
+                                "system_prompt": "{{test_system_prompt}}",
+                                "user_id_owner": "{{test_user_id}}"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/organizations": {
+            "get": {
+                "summary": "organizations",
+                "deprecated": false,
+                "description": "",
+                "operationId": "get_organizations",
+                "tags": [
+                    "v1/Organizations"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/organizations/{organization_id}/users": {
+            "get": {
+                "summary": "organizations/{org_id}/users",
+                "deprecated": false,
+                "description": "",
+                "operationId": "get_organizations_users",
+                "tags": [
+                    "v1/Organizations"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/users/{user_id}/conversations/{conversation_id}/messages": {
+            "get": {
+                "summary": "messages",
+                "deprecated": false,
+                "description": "",
+                "operationId": "get_messages",
+                "tags": [
+                    "v1/Messages"
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_user_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "conversation_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_conversation_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "summary": "messages",
+                "deprecated": false,
+                "description": "",
+                "operationId": "post_messages",
+                "tags": [
+                    "v1/Messages"
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_user_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "conversation_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_conversation_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "accumulate": {
+                                        "type": "boolean"
+                                    },
+                                    "bot_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "full_conversation": {
+                                        "type": "boolean"
+                                    },
+                                    "input": {
+                                        "type": "string"
+                                    },
+                                    "num_message_history": {
+                                        "type": "integer"
+                                    },
+                                    "organization_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "stream": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "required": [
+                                    "accumulate",
+                                    "full_conversation",
+                                    "input",
+                                    "num_message_history",
+                                    "organization_id",
+                                    "stream",
+                                    "bot_id"
+                                ]
+                            },
+                            "example": {
+                                "accumulate": false,
+                                "bot_id": "{{test_bot_id}}",
+                                "full_conversation": false,
+                                "input": "{{test_message_input}}",
+                                "num_message_history": 5,
+                                "organization_id": "{{test_organization_id}}",
+                                "stream": true
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    },
+                    "x-200:Success Stream": {
+                        "description": "Success Stream",
+                        "content": {
+                            "text/event-stream": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/users/{user_id}/conversations": {
+            "get": {
+                "summary": "conversations",
+                "deprecated": false,
+                "description": "",
+                "operationId": "get_conversations",
+                "tags": [
+                    "v1/Conversations"
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_user_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "summary": "conversations",
+                "deprecated": false,
+                "description": "",
+                "operationId": "post_conversations",
+                "tags": [
+                    "v1/Conversations"
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_user_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "bot_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "organization_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "required": [
+                                    "bot_id",
+                                    "organization_id"
+                                ]
+                            },
+                            "example": {
+                                "bot_id": "{{test_bot_id}}",
+                                "organization_id": "{{test_organization_id}}"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/users": {
+            "get": {
+                "summary": "users",
+                "deprecated": false,
+                "description": "",
+                "operationId": "get_users",
+                "tags": [
+                    "v1/Users"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "summary": "users",
+                "deprecated": false,
+                "description": "",
+                "operationId": "post_users",
+                "tags": [
+                    "v1/Users"
+                ],
+                "parameters": [],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "organization_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "required": [
+                                    "organization_id"
+                                ]
+                            },
+                            "example": {
+                                "organization_id": "{{test_organization_id}}"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/users/{user_id}": {
+            "get": {
+                "summary": "users/{user_id}",
+                "deprecated": false,
+                "description": "",
+                "operationId": "get_users_user_id",
+                "tags": [
+                    "v1/Users"
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_user_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {},
+        "securitySchemes": {
+            "bearer": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "servers": []
+}

@@ -9,8 +9,8 @@ usersRouter
       p_organization_id: null,
     });
 
-    console.log("error:", error);
-    console.log("data:", data);
+    // console.log("error:", error);
+    // console.log("data:", data);
 
     if (error) {
       context.response.status = Status.BadRequest;
@@ -21,15 +21,15 @@ usersRouter
     }
   })
   .post("/", async (context) => {
-    const body = await context.request.body().value;
-    console.log(body);
+    const body = await context.request.body.json();
+    // console.log(body);
 
     const { data, error } = await context.state.sbclient.rpc("create_user", {
       p_organization_id: body.organization_id ?? null,
     });
 
-    console.log("error:", error);
-    console.log("data:", data);
+    // console.log("error:", error);
+    // console.log("data:", data);
 
     if (error) {
       context.response.status = Status.BadRequest;

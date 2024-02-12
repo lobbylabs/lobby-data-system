@@ -14,8 +14,8 @@ conversationsRouter
       }
     );
 
-    console.log("error:", error);
-    console.log("data:", data);
+    // console.log("error:", error);
+    // console.log("data:", data);
 
     if (error) {
       context.response.status = Status.BadRequest;
@@ -27,7 +27,7 @@ conversationsRouter
   })
   .post("/", async (context) => {
     const userId = context.params.userId;
-    const { organization_id, bot_id } = await context.request.body().value;
+    const { organization_id, bot_id } = await context.request.body.json();
 
     const { data, error } = await context.state.sbclient.rpc(
       "create_conversation",
@@ -38,8 +38,8 @@ conversationsRouter
       }
     );
 
-    console.log("error:", error);
-    console.log("data:", data);
+    // console.log("error:", error);
+    // console.log("data:", data);
 
     if (error) {
       context.response.status = Status.BadRequest;
@@ -60,8 +60,8 @@ conversationsRouter
       }
     );
 
-    console.log("error:", error);
-    console.log("data:", data);
+    // console.log("error:", error);
+    // console.log("data:", data);
 
     if (error) {
       context.response.status = Status.BadRequest;

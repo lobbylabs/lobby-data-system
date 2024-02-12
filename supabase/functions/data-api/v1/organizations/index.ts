@@ -9,8 +9,8 @@ organizationsRouter
       .from("organizations")
       .select("*");
 
-    console.log("error:", error);
-    console.log("data:", data);
+    // console.log("error:", error);
+    // console.log("data:", data);
 
     if (error) {
       context.response.status = Status.BadRequest;
@@ -38,14 +38,14 @@ organizationsRouter
   })
   .get("/:orgId/users", async (context) => {
     const orgId = context.params.orgId;
-    console.log(context);
+    // console.log(context);
 
     const { data, error } = await context.state.sbclient.rpc("get_users_orgs", {
       p_organization_id: orgId,
     });
 
-    console.log("error:", error);
-    console.log("data:", data);
+    // console.log("error:", error);
+    // console.log("data:", data);
 
     if (error) {
       context.response.status = Status.BadRequest;

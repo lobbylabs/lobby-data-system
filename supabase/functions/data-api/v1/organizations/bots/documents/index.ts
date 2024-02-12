@@ -27,9 +27,8 @@ documentsRouter
     // Store the document in the database using Supabase client
     const orgId = context.params.orgId;
     const botId = context.params.botId;
-
-    const { text, title, source_url } = await context.request.body().value;
-    console.log(text, title, source_url, orgId, botId);
+    const { text, title, source_url } = await context.request.body.json();
+    // console.log(text, title, source_url, orgId, botId);
 
     const chunks = await getChunks(text, 200);
     const { data: documentData, error: documentError } =

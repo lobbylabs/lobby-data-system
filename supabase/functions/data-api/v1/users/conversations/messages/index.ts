@@ -51,7 +51,7 @@ messagesRouter
       accumulate,
       full_conversation,
       num_message_history,
-    } = await context.request.body().value;
+    } = await context.request.body.json();
     // console.log(bot_id, organization_id, input);
     const userId = context.params.userId;
     const convId = context.params.convId;
@@ -155,7 +155,6 @@ messagesRouter
 
     console.log("Getting context");
     // grab context from bot
-    console.log("Getting bot");
     const { data: contextData, error: contextError } =
       await context.state.sbclient.rpc("document_chunk_similarity_search", {
         p_organization_id: organization_id,
@@ -166,14 +165,14 @@ messagesRouter
         p_embedding_jina_v2_base_en: newUserMessageContentEmbedding,
       });
 
-    if (botError) {
+    if (contextError) {
       context.response.status = Status.BadRequest;
       context.response.body = { error: botError };
       return;
     }
 
     // const systemMessage = new Message(Role.System, botData.system_prompt);
-    console.log("contextData:", contextData);
+    // console.log("contextData:", contextData);
 
     const systemMessage = new Message(Role.System, botData.system_prompt);
     // console.log("systemMessage:", systemMessage);
@@ -193,6 +192,8 @@ messagesRouter
       systemMessage.content += `\n${contextPrefix}${contextText}`;
     }
 
+    // console.log(systemMessage.content)
+
     console.log("Constructing conversation");
     const conversation: Conversation = [
       systemMessage,
@@ -200,8 +201,8 @@ messagesRouter
       newUserMessage,
     ];
     const conversation_json = JSON.parse(JSON.stringify(conversation));
+    // console.log("conversation_json:", conversation_json)
 
-    console.log("conversation:", conversation);
 
     // console.log("HERE");
 
@@ -246,8 +247,7 @@ messagesRouter
         const completion = await openai.chat.completions.create({
           messages: conversation_json,
           model: "mixtral",
-          stream: true,
-          max_tokens: 100,
+          stream: true
         });
         console.log("Sending data packets...");
         for await (const chunk of completion) {
