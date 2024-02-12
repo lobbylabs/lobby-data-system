@@ -164,20 +164,20 @@ CREATE INDEX ON data.document_chunks USING hnsw(chunk_content_embedding_ada_002 
 
 CREATE INDEX ON data.document_chunks USING hnsw(chunk_content_embedding_jina_v2_base_en vector_l2_ops) WITH (m = 16, ef_construction = 64);
 
--- alter table
---   data.bots enable row level security;
--- alter table
---   data.conversations enable row level security;
--- alter table
---   data.messages enable row level security;
--- alter table
---   data.documents enable row level security;
--- alter table
---   data.document_chunks enable row level security;
--- alter table
---   data.users enable row level security;
--- alter table
---   data.organizations enable row level security;
+ALTER TABLE data.bots ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE data.conversations ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE data.messages ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE data.documents ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE data.document_chunks ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE data.users ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE data.organizations ENABLE ROW LEVEL SECURITY;
+
 -- GRANT
 --   ALL ON TABLE data.bots TO service_role;
 -- GRANT
@@ -258,7 +258,6 @@ CREATE OR REPLACE FUNCTION data.document_chunk_similarity_search(p_organization_
         prev_chunk uuid,
         next_chunk uuid,
         similarity float)
-    LANGUAGE plpgsql
     STABLE
     AS $$
 BEGIN
@@ -320,7 +319,11 @@ END IF;
         RAISE EXCEPTION 'Invalid vector type';
     END IF;
 END
-$$;
+$$
+LANGUAGE plpgsql
+SECURITY INVOKER;
+
+;
 
 CREATE OR REPLACE FUNCTION data.create_document_with_chunks(p_bot_id uuid, p_organization_id uuid, p_title varchar(255), p_chunks_info json, p_author varchar(255) DEFAULT NULL, p_source_url varchar(2048) DEFAULT NULL, p_document_type varchar(100) DEFAULT NULL, p_content text DEFAULT NULL, p_content_size_kb integer DEFAULT NULL, p_content_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_content_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL, p_document_summary text DEFAULT NULL, p_document_summary_embedding_ada_002 extensions.vector(1536) DEFAULT NULL, p_document_summary_embedding_jina_v2_base_en extensions.vector(768) DEFAULT NULL, p_mime_type varchar(100) DEFAULT NULL, p_overwrite_id uuid DEFAULT NULL)
     RETURNS SETOF data.documents
@@ -425,10 +428,11 @@ END LOOP;
         data.documents
     WHERE
         data.documents.id = _doc_id;
-    END;
+END;
 
 $$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+SECURITY INVOKER;
 
 CREATE OR REPLACE FUNCTION data.get_documents(p_bot_id uuid, p_organization_id uuid)
     RETURNS SETOF data.documents
@@ -446,7 +450,8 @@ BEGIN
         data.documents.updated_at DESC;
 END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+SECURITY INVOKER;
 
 -- creates a new user and org or adds new user to existing org if org id is provided
 CREATE OR REPLACE FUNCTION data.create_user(p_organization_id uuid DEFAULT NULL, p_overwrite_user_id uuid DEFAULT NULL, p_overwrite_org_id uuid DEFAULT NULL)
@@ -511,7 +516,8 @@ END IF;
         data.organization_members.user_id, data.organization_members.organization_id;
 END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+SECURITY INVOKER;
 
 CREATE OR REPLACE FUNCTION data.get_users_orgs(p_organization_id uuid DEFAULT NULL)
     RETURNS TABLE(
@@ -547,7 +553,8 @@ BEGIN
     END IF;
 END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+SECURITY INVOKER;
 
 CREATE OR REPLACE FUNCTION data.get_user_conversations(p_user_id uuid)
     RETURNS TABLE(
@@ -566,7 +573,8 @@ BEGIN
         c.updated_at DESC;
 END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+SECURITY INVOKER;
 
 CREATE OR REPLACE FUNCTION data.get_user_conversation(p_user_id uuid, p_conversation_id uuid)
     RETURNS TABLE(
@@ -584,7 +592,8 @@ BEGIN
         AND c.id = p_conversation_id;
 END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+SECURITY INVOKER;
 
 CREATE OR REPLACE FUNCTION data.create_conversation(p_user_id uuid, p_organization_id uuid DEFAULT NULL, p_bot_id uuid DEFAULT NULL, p_overwrite_id uuid DEFAULT NULL)
     RETURNS SETOF data.conversations
@@ -603,7 +612,8 @@ BEGIN
     END IF;
 END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+SECURITY INVOKER;
 
 CREATE OR REPLACE FUNCTION data.get_user_messages(p_user_id uuid, p_conversation_id uuid, p_num_messages integer DEFAULT NULL)
     RETURNS SETOF data.messages
@@ -622,7 +632,8 @@ BEGIN
     LIMIT p_num_messages;
 END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+SECURITY INVOKER;
 
 CREATE OR REPLACE FUNCTION data.get_bots(p_organization_id uuid)
     RETURNS SETOF data.bots
@@ -639,7 +650,8 @@ BEGIN
         b.updated_at DESC;
 END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+SECURITY INVOKER;
 
 CREATE OR REPLACE FUNCTION data.get_bot(p_bot_id uuid, p_organization_id uuid)
     RETURNS data.bots
@@ -657,7 +669,8 @@ BEGIN
     RETURN result;
 END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+SECURITY INVOKER;
 
 CREATE OR REPLACE FUNCTION data.create_message(p_user_id uuid, p_organization_id uuid, p_bot_id uuid, p_conversation_id uuid, p_message_type varchar, p_message_content text, p_message_content_embedding_jina_v2_base_en extensions.vector)
     RETURNS SETOF data.messages
@@ -682,5 +695,6 @@ BEGIN
         *;
 END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE plpgsql
+SECURITY INVOKER;
 

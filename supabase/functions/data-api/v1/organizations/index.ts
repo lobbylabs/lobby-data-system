@@ -1,15 +1,16 @@
 import { Router, Status } from "oak";
-import { sbclient } from "../../../_shared/supabase.ts";
 import { botsRouter } from "./bots/index.ts";
 
 const organizationsRouter = new Router();
 
 organizationsRouter
   .get("/", async (context) => {
-    const { data, error } = await sbclient.from("organizations").select("*");
+    const { data, error } = await context.state.sbclient
+      .from("organizations")
+      .select("*");
 
-    console.log("error:", error);
-    console.log("data:", data);
+    // console.log("error:", error);
+    // console.log("data:", data);
 
     if (error) {
       context.response.status = Status.BadRequest;
@@ -37,14 +38,14 @@ organizationsRouter
   })
   .get("/:orgId/users", async (context) => {
     const orgId = context.params.orgId;
-    console.log(context);
+    // console.log(context);
 
-    const { data, error } = await sbclient.rpc("get_users_orgs", {
+    const { data, error } = await context.state.sbclient.rpc("get_users_orgs", {
       p_organization_id: orgId,
     });
 
-    console.log("error:", error);
-    console.log("data:", data);
+    // console.log("error:", error);
+    // console.log("data:", data);
 
     if (error) {
       context.response.status = Status.BadRequest;

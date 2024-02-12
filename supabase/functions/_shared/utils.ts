@@ -52,7 +52,7 @@ const tokenizerStore: TokenizerStore = {
 env.useBrowserCache = false;
 env.allowLocalModels = false;
 env.allowRemoteModels = false;
-console.log(env);
+// console.log(env);
 
 for (const [modelName, details] of Object.entries(tokenizerStore)) {
 

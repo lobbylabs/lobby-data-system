@@ -1,5 +1,4 @@
 import { Router, Status } from "oak";
-import { sbclient } from "../../../../_shared/supabase.ts";
 import { documentsRouter } from "./documents/index.ts";
 
 const botsRouter = new Router();
@@ -7,13 +6,13 @@ const botsRouter = new Router();
 botsRouter
   .get("/", async (context) => {
     const orgId = context.params.orgId;
-    console.log("orgId:", orgId);
-    const { data, error } = await sbclient.rpc("get_bots", {
+    // console.log("orgId:", orgId);
+    const { data, error } = await context.state.sbclient.rpc("get_bots", {
       p_organization_id: orgId,
     });
 
-    console.log("error:", error);
-    console.log("data:", data);
+    // console.log("error:", error);
+    // console.log("data:", data);
 
     if (error) {
       context.response.status = Status.BadRequest;
@@ -26,16 +25,16 @@ botsRouter
   .post("/", async (context) => {
     // creating a new bot
     const orgId = context.params.orgId;
-    const { user_id_owner, system_prompt } = await context.request.body().value;
-    console.log(orgId, user_id_owner, system_prompt);
-    const { data, error } = await sbclient.rpc("create_bot", {
+    const { user_id_owner, system_prompt } = await context.request.body.json();
+    // console.log(orgId, user_id_owner, system_prompt);
+    const { data, error } = await context.state.sbclient.rpc("create_bot", {
       p_organization_id: orgId,
       p_user_id_owner: user_id_owner,
       p_system_prompt: system_prompt ?? "",
     });
 
-    console.log("error:", error);
-    console.log("data:", data);
+    // console.log("error:", error);
+    // console.log("data:", data);
 
     if (error) {
       context.response.status = Status.BadRequest;
