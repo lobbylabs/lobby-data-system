@@ -1,0 +1,9 @@
+@startuml
+actor Client
+entity "Supabase Edge Function API" as API
+entity "Postgres Database" as Postgres
+
+Client -> API : HTTP Request
+API -> Postgres : Calls Functions / SQL Operations
+note right of Postgres : Schema 'data'
+@enduml
