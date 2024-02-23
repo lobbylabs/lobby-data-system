@@ -1,0 +1,4 @@
+- gett PATCH and DELETE routes working
+- add/test user scopes
+- verify/add status, message, data response format for all routes
+- 
