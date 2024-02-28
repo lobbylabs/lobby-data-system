@@ -63,6 +63,11 @@ supabase db reset
 supabase gen types typescript --local > supabase/types/supabase.ts
 ```
 
+## Running Functions Locally
+```
+supabase functions serve --debug
+```
+
 ## Deploying Functions
 ```
 supabase secrets set --env-file ./supabase/functions/.env
@@ -70,4 +75,28 @@ supabase secrets set --env-file ./supabase/functions/.env
 
 ```
 supabase functions deploy data-api
+```
+
+## Reset remote database (DEV ONLY!)
+
+Always check linked project first:
+```
+supabase projects list
+```
+
+```
+supabase db reset --linked
+```
+
+## Generate Documentation Diagrams
+
+1. Install plantuml
+
+```bash
+brew install plantuml
+```
+
+2. Run the generation command
+```bash
+plantuml -overwrite ./docs/diagrams/main.puml
 ```

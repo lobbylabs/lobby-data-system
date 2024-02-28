@@ -1,32 +1,53 @@
 import { Router, Status } from "oak";
-import { botsRouter } from "./bots/index.ts";
 
 const organizationsRouter = new Router();
 
 organizationsRouter
   .get("/", async (context) => {
-    const { data, error } = await context.state.sbclient
-      .from("organizations")
-      .select("*");
-
-    // console.log("error:", error);
-    // console.log("data:", data);
+    const { data, error } = await context.state.sbclient.rpc(
+      "get_organizations"
+    );
 
     if (error) {
       context.response.status = Status.BadRequest;
       context.response.body = { error: error };
     } else {
       context.response.status = Status.OK;
-      context.response.body = { data: data };
+      context.response.body = {
+        status: context.response.status,
+        data: data,
+        message: "Organization list retrieved succesfully",
+      };
     }
   })
   .post("/", (context) => {
     context.response.status = Status.NotImplemented;
     context.response.body = "Creating a new organization.";
   })
-  .get("/:orgId", (context) => {
-    context.response.status = Status.NotImplemented;
-    context.response.body = `Fetching organization with ID: ${context.params.orgId}`;
+  .get("/:orgId", async (context) => {
+    const orgId = context.params.orgId;
+
+    const { data, error } = await context.state.sbclient.rpc(
+      "get_organization",
+      { p_organization_id: orgId }
+    );
+
+    if (error) {
+      context.response.status = Status.BadRequest;
+      context.response.body = {
+        status: context.response.status,
+        data: null,
+        message: error.message,
+        error_details: error,
+      };
+    } else {
+      context.response.status = Status.OK;
+      context.response.body = {
+        status: context.response.status,
+        data: data[0],
+        message: "Organization details retrieved succesfully",
+      };
+    }
   })
   .put("/:orgId", (context) => {
     context.response.status = Status.NotImplemented;
@@ -40,20 +61,26 @@ organizationsRouter
     const orgId = context.params.orgId;
     // console.log(context);
 
-    const { data, error } = await context.state.sbclient.rpc("get_users_orgs", {
-      p_organization_id: orgId,
-    });
-
-    // console.log("error:", error);
-    // console.log("data:", data);
+    const { data, error } = await context.state.sbclient.rpc(
+      "get_organization_users",
+      { p_organization_id: orgId }
+    );
 
     if (error) {
       context.response.status = Status.BadRequest;
-      context.response.body = { error: error };
+      context.response.body = {
+        status: context.response.status,
+        data: null,
+        message: error.message,
+        error_details: error,
+      };
     } else {
       context.response.status = Status.OK;
-      context.response.body = { data: data };
+      context.response.body = {
+        status: context.response.status,
+        data: data,
+        message: "Organization users retrieved succesfully",
+      };
     }
-  })
-  .use("/:orgId/bots", botsRouter.routes(), botsRouter.allowedMethods());
+  });
 export { organizationsRouter };

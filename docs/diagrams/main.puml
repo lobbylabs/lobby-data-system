@@ -1,0 +1,250 @@
+@startuml main
+skinparam groupInheritance 2
+skinparam linetype polyline
+
+!procedure $init_legend()
+skinparam legend {
+    backgroundColor #GhostWhite
+    entrySeparator #GhostWhite
+}
+legend left
+<#GhostWhite,#GhostWhite>|        |= __Legend__ |
+|<size:16><color:DarkGoldenRod><&key></color></size>|Primary Key|
+|<color:Gray><&key></color>|Foreign Key|
+|<size:16><color:Purple><&grid-two-up></color></size>|Partition Key|
+|<size:16><color:DarkGoldenRod><&arrow-thick-bottom>||
+|<size:16><color:DarkGoldenRod><&arrow-thick-top>|Composite Primary Key|
+|●|Required (not null)|
+|<color:Green>○|Optional (nullable)|
+endlegend
+!endprocedure
+$init_legend()
+
+namespace "Data Schema" as data_schema {
+    together {
+        !procedure $init_users()
+        entity users << (T,#ADD1B2) table >> {
+            *<size:16><color:DarkGoldenRod><&key></color></size> <b>id</b> : <i>uuid <<default: gen_random_uuid()>></i>
+            ..
+            +<size:16><color:Gray><&key></color></size> <b>organization_id</b> (organizations.id) : <i>uuid</i>
+            ..
+
+        }
+        !endprocedure
+        $init_users()
+
+        !procedure $init_organizations()
+        entity organizations << (T,#ADD1B2) table >> {
+            *<size:16><color:DarkGoldenRod><&key></color></size> <b>id : <i>uuid<<default: gen_random_uuid()>></i>
+            *<size:16><color:Gray><&key></color></size> <b>user_id_owner (users.id) : <i>uuid</i>
+            ..
+        }
+        !endprocedure
+        $init_organizations()
+    }
+
+    !procedure $init_organization_members()
+    entity organization_members << (T,#ADD1B2) table >> {
+        *<size:16><color:DarkGoldenRod><&key></color></size><size:16><color:DarkGoldenRod><&arrow-thick-bottom></color></size><size:16><color:Gray><&key></color></size> <b>user_id</b> (users.id) : <i>uuid</i>
+        *<size:16><color:DarkGoldenRod><&key></color></size><size:16><color:DarkGoldenRod><&arrow-thick-top></color></size><size:16><color:Gray><&key></color></size> <b>organization_id</b> (organizations.id) : <i>uuid</i>
+    }
+    !endprocedure
+    $init_organization_members()
+
+    !procedure $init_bots()
+    entity bots << (T,#ADD1B2) table, partitioned >> {
+        *<size:16><color:DarkGoldenRod><&key></color></size><size:16><color:DarkGoldenRod><&arrow-thick-bottom></color></size> <b>id</b> : <i>uuid<<default: gen_random_uuid()>></i>
+        *<size:16><color:DarkGoldenRod><&key></color></size><size:16><color:DarkGoldenRod><&arrow-thick-top></color></size><size:16><color:Gray><&key></color></size><size:16><color:Purple><&grid-two-up></color></size> <b>organization_id</b> (organizations.id) : <i>uuid</i>
+        ..
+        *<size:16><color:Gray><&key></color></size> <b>user_id_owner</b> (users.id) : <i>uuid</i>
+        ..
+        *<b>created_at</b> : <i>timestamp <<default: now()>></i>
+        *<b>updated_at</b> : <i>timestamp <<default: now()>></i>
+        *<b>system_prompt</b> : <i>text <<default: "">></i>
+        +<b>bot_summary</b> : <i>text</i>
+        +<b>bot_summary_embedding_ada_002</b> : <i>vector[1536]</i>
+        +<b>bot_summary_embedding_jina_v2_base_en</b> : <i>vector[768]</i>
+    }
+    !endprocedure
+    $init_bots()
+
+    together {
+        !procedure $init_conversations()
+        entity conversations << (T,#ADD1B2) table, partitioned >> {
+            *<size:16><color:DarkGoldenRod><&key></color></size><size:16><color:DarkGoldenRod><&arrow-thick-bottom></color></size> <b>id</b> : <i>uuid<<default: gen_random_uuid()>></i>
+            *<size:16><color:DarkGoldenRod><&key></color></size><size:16><color:DarkGoldenRod><&arrow-thick-top></color></size><size:16><color:Gray><&key></color></size><size:16><color:Purple><&grid-two-up></color></size> <b>user_id</b> (users.id) : <i>uuid</i>
+            ..
+            *<size:16><color:Gray><&key></color></size> <b>organization_id</b> (organizations.id) : <i>uuid</i>
+            *<size:16><color:Gray><&key></color></size> <b>bot_id</b> (bots.id) : <i>uuid</i>
+            ..
+            *<b>created_at</b> : <i>timestamp <<default: now()>></i>
+            *<b>updated_at</b> : <i>timestamp <<default: now()>></i>
+            +<b>conversation_summary</b> : <i>text</i>
+            +<b>conversation_summary_embedding_ada_002</b> : <i>vector [1536]</i>
+            +<b>conversation_summary_embedding_jina_v2_base_en</b> : <i>vector [768]</i>
+
+        }
+        !endprocedure
+        $init_conversations()
+
+        !procedure $init_messages()
+        entity messages << (T,#ADD1B2) table, partitioned >> {
+            *<size:16><color:DarkGoldenRod><&key></color></size><size:16><color:DarkGoldenRod><&arrow-thick-bottom></color></size> <b>id</b> : <i>uuid<<default: gen_random_uuid()>></i>
+            *<size:16><color:DarkGoldenRod><&key></color></size><size:16><color:DarkGoldenRod><&arrow-thick-top></color></size><size:16><color:Gray><&key></color></size><size:16><color:Purple><&grid-two-up></color></size> <b>user_id</b>(users.id) : <i>uuid</i>
+            ..
+            *<size:16><color:Gray><&key></color></size> <b>organization_id</b> (organizations.id) : <i>uuid</i>
+            *<size:16><color:Gray><&key></color></size> <b>bot_id</b> (bots.id) : <i>uuid</i>
+            *<size:16><color:Gray><&key></color></size> <b>conversation_id</b> : <i>uuid</i>
+            ..
+            *<b>message_type</b> : <i>varchar(100)</i>
+            *<b>message_index</b> : <i>bigint</i>
+            *<b>message_content</b> : <i>text</i>
+            *<b>message_content_embedding_ada_002</b> : <i>vector [1536]</i>
+            *<b>message_content_embedding_jina_v2_base_en</b> : <i>vector [768]</i>
+            *<b>created_at</b> : <i>timestamp <<default: now()>></i>
+        }
+        !endprocedure
+        $init_messages()
+    }
+
+
+    together {
+        !procedure $init_documents()
+        entity documents << (T,#ADD1B2) table, partitioned >> {
+            *<size:16><color:DarkGoldenRod><&key></color></size><size:16><color:DarkGoldenRod><&arrow-thick-bottom></color></size> <b>id</b> : <i>uuid<<default: gen_random_uuid()>></i>
+            *<size:16><color:DarkGoldenRod><&key></color></size><size:16><color:DarkGoldenRod><&arrow-thick-top></color></size><size:16><color:Purple><&grid-two-up></color></size> <b>bot_id (bots.id)</b> : <i>uuid</i>
+            --
+            *<size:16><color:Gray><&key></color></size> <b>organization_id (organizations.id)</b> : <i>uuid</i>
+            --
+            *<b>num_chunks</b> : <i>integer</i>
+            *<b>created_at</b> : <i>timestamp <<default: now()>></i>
+            *<b>last_updated</b> : <i>timestamp <<default: now()>></i>
+            +<b>title</b> : varchar[255]
+            +<b>author</b> : varchar[255]
+            +<b>source_url</b> : varchar[2048]
+            +<b>document_type</b> : <i>varchar[100]</i>
+            +<b>content</b> : <i>text</i>
+            +<b>content_size_kb</b> : <i>integer</i>
+            +<b>content_embedding_ada_002</b> : <i>vector [1536]</i>
+            +<b>content_embedding_jina_v2_base_en</b> : <i>vector [768]</i>
+            +<b>document_summary</b> : <i>text</i>
+            +<b>document_summary_embedding_ada_002</b> : <i>vector [1536]</i>
+            +<b>document_summary_embedding_jina_v2_base_en</b> : <i>vector [768]</i>
+            +<b>mime_type</b> : <i>varchar[100]</i>
+
+        }
+        !endprocedure
+        $init_documents()
+
+        !procedure $init_document_chunks()
+        entity document_chunks << (T,#ADD1B2) table, partitioned >> {
+            *<size:16><color:DarkGoldenRod><&key></color></size><size:16><color:DarkGoldenRod><&arrow-thick-bottom></color></size> <b>id</b> : <i>uuid<<default: gen_random_uuid()>></i>
+            *<size:16><color:DarkGoldenRod><&key></color></size><size:16><color:DarkGoldenRod><&arrow-thick-top></color></size><size:16><color:Purple><&grid-two-up></color></size> <b>bot_id (bots.id)</b> : <i>uuid</i>
+            --
+            *<size:16><color:Gray><&key></color></size> <b>organization_id</b> (organizations.id): <i>uuid</i>
+            *<size:16><color:Gray><&key></color></size> <b>document_id</b> (documents.id) : <i>uuid</i>
+            +<size:16><color:Gray><&key></color></size> <b>prev_chunk</b> [document_chunks.id] : <i>uuid</i>
+            +<size:16><color:Gray><&key></color></size> <b>next_chunk</b> [document_chunks.id] : <i>uuid</i>
+            --
+            *<b>chunk_content</b> : <i>text</i>
+            +<b>chunk_content_embedding_ada_002</b> : <i>vector [1536]</i>
+            +<b>chunk_content_embedding_jina_v2_base_en</b> : <i>vector [768]</i>
+
+        }
+        !endprocedure
+        $init_document_chunks()
+    }
+
+
+    users [id] -[bold,#LightBlue]- [user_id_owner] organizations
+    users [id] -[bold,#LightBlue]- [user_id_owner] bots
+    users [id] -[bold,#LightBlue]- [user_id] organization_members
+    users [id] -[bold,#LightBlue]- [user_id] conversations
+    users [id] -[bold,#LightBlue]- [user_id] messages
+    organizations [id] -[bold,#LightGreen]- [organization_id] users
+    organizations [id] -[bold,#LightGreen]- [organization_id] organization_members
+    organizations [id] -[bold,#LightGreen]- [organization_id] bots
+    organizations [id] -[bold,#LightGreen]- [organization_id] conversations
+    organizations [id] -[bold,#LightGreen]- [organization_id] messages
+    organizations [id] -[bold,#LightGreen]- [organization_id] documents
+    organizations [id] -[bold,#LightGreen]- [organization_id] document_chunks
+    bots [id] -[bold,#LightCoral]- [bot_id] conversations
+    bots [id] -[bold,#LightCoral]- [bot_id] messages
+    bots [id] -[bold,#LightCoral]- [bot_id] documents
+    bots [id] -[bold,#LightCoral]- [bot_id] document_chunks
+    documents [id] -[bold,#Purple]- [document_id] document_chunks
+    conversations [id] -[bold,#Orange]- [conversation_id] messages
+}
+
+' namespace database_functions {
+' }
+
+newpage
+$init_legend()
+$init_users()
+users [id] -[bold,#LightBlue]- [user_id_owner] organizations
+users [id] -[bold,#LightBlue]- [user_id_owner] bots
+users [id] -[bold,#LightBlue]- [user_id] organization_members
+users [id] -[bold,#LightBlue]- [user_id] conversations
+users [id] -[bold,#LightBlue]- [user_id] messages
+organizations [id] -[bold,#LightGreen]- [organization_id] users
+
+newpage
+$init_legend()
+$init_organizations()
+users [id] -[bold,#LightBlue]- [user_id_owner] organizations
+organizations [id] -[bold,#LightGreen]- [organization_id] users
+organizations [id] -[bold,#LightGreen]- [organization_id] organization_members
+organizations [id] -[bold,#LightGreen]- [organization_id] bots
+organizations [id] -[bold,#LightGreen]- [organization_id] conversations
+organizations [id] -[bold,#LightGreen]- [organization_id] messages
+organizations [id] -[bold,#LightGreen]- [organization_id] documents
+organizations [id] -[bold,#LightGreen]- [organization_id] document_chunks
+
+newpage
+$init_legend()
+$init_organization_members()
+users [id] -[bold,#LightBlue]- [user_id] organization_members
+organizations [id] -[bold,#LightGreen]- [organization_id] organization_members
+
+newpage
+$init_legend()
+$init_bots()
+users [id] -[bold,#LightBlue]- [user_id_owner] bots
+organizations [id] -[bold,#LightGreen]- [organization_id] bots
+bots [id] -[bold,#LightCoral]- [bot_id] conversations
+bots [id] -[bold,#LightCoral]- [bot_id] messages
+bots [id] -[bold,#LightCoral]- [bot_id] documents
+bots [id] -[bold,#LightCoral]- [bot_id] document_chunks
+
+newpage
+$init_legend()
+$init_documents()
+organizations [id] -[bold,#LightGreen]- [organization_id] documents
+bots [id] -[bold,#LightCoral]- [bot_id] documents
+documents [id] -[bold,#Purple]- [document_id] document_chunks
+
+newpage
+$init_legend()
+$init_document_chunks()
+organizations [id] -[bold,#LightGreen]- [organization_id] document_chunks
+bots [id] -[bold,#LightCoral]- [bot_id] document_chunks
+documents [id] -[bold,#Purple]- [document_id] document_chunks
+
+newpage
+$init_legend()
+$init_conversations()
+users [id] -[bold,#LightBlue]- [user_id] conversations
+organizations [id] -[bold,#LightGreen]- [organization_id] conversations
+bots [id] -[bold,#LightCoral]- [bot_id] conversations
+conversations [id] -[bold,#Orange]- [conversation_id] messages
+
+newpage
+$init_legend()
+$init_messages()
+users [id] -[bold,#LightBlue]- [user_id] messages
+organizations [id] -[bold,#LightGreen]- [organization_id] messages
+bots [id] -[bold,#LightCoral]- [bot_id] messages
+conversations [id] -[bold,#Orange]- [conversation_id] messages
+
+@enduml

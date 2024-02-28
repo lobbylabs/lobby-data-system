@@ -23,7 +23,7 @@ enum Model {
   jinaai_jina_embeddings_v2_base_en = "jinaai/jina-embeddings-v2-base-en",
 }
 
-// // Define the type for tokenizerStore entries
+// Define the type for tokenizerStore entries
 type TokenizerStore = {
   [modelName in Model]: {
     tokenizerJSON: object;
@@ -54,27 +54,59 @@ env.allowLocalModels = false;
 env.allowRemoteModels = false;
 // console.log(env);
 
-for (const [modelName, details] of Object.entries(tokenizerStore)) {
+function getTokenizerEntry(model: Model) {
+  if (!tokenizerStore[model].tokenizer) {
+    // console.log("loading model:", model," for the first time");
+    const tokenizerName: TOKENIZER_CLASS_MAPPING = tokenizerStore[model].tokenizerConfig.tokenizer_class?.replace(/Fast$/, '') ?? 'PreTrainedTokenizer';
 
-  const tokenizerName: TOKENIZER_CLASS_MAPPING = details.tokenizerConfig.tokenizer_class?.replace(/Fast$/, '') ?? 'PreTrainedTokenizer';
-
-  let cls = AutoTokenizer.TOKENIZER_CLASS_MAPPING[tokenizerName];
-  if (!cls) {
-    console.warn(`Unknown tokenizer class "${tokenizerName}", attempting to construct from base class.`);
-    cls = PreTrainedTokenizer;
-  }
-  details.tokenizer = new cls(details.tokenizerJSON, details.tokenizerConfig);
+    let cls = AutoTokenizer.TOKENIZER_CLASS_MAPPING[tokenizerName];
+    if (!cls) {
+      console.warn(`Unknown tokenizer class "${tokenizerName}", attempting to construct from base class.`);
+      cls = PreTrainedTokenizer;
+    }
+    tokenizerStore[model].tokenizer = new cls(tokenizerStore[model].tokenizerJSON, tokenizerStore[model].tokenizerConfig);
 
 
-  if (details.tokenizer) {
-    console.log(`Tokenizer is available for ${modelName}`);
-    // Perform operations with details.tokenizer if needed...
+    if (tokenizerStore[model].tokenizer) {
+      console.log(`Tokenizer is available for ${model}`);
+      // Perform operations with details.tokenizer if needed...
+    } else {
+      console.log(`Tokenizer failed to initialize for ${model}`);
+    }
   } else {
-    console.log(`Tokenizer failed to initialize for ${modelName}`);
+    // console.log("model:", model," already loaded");
   }
-
-
+  return tokenizerStore[model]
+  
 }
+
+
+
+
+
+
+
+
+
+// for (const [modelName, details] of Object.entries(tokenizerStore)) {
+
+//   const tokenizerName: TOKENIZER_CLASS_MAPPING = details.tokenizerConfig.tokenizer_class?.replace(/Fast$/, '') ?? 'PreTrainedTokenizer';
+
+//   let cls = AutoTokenizer.TOKENIZER_CLASS_MAPPING[tokenizerName];
+//   if (!cls) {
+//     console.warn(`Unknown tokenizer class "${tokenizerName}", attempting to construct from base class.`);
+//     cls = PreTrainedTokenizer;
+//   }
+//   details.tokenizer = new cls(details.tokenizerJSON, details.tokenizerConfig);
+
+
+//   if (details.tokenizer) {
+//     console.log(`Tokenizer is available for ${modelName}`);
+//     // Perform operations with details.tokenizer if needed...
+//   } else {
+//     console.log(`Tokenizer failed to initialize for ${modelName}`);
+//   }
+// }
 enum Role {
   System = "system",
   User = "user",
@@ -93,8 +125,11 @@ class Message {
 
 type Conversation = Message[]
 
+
+
+
 function getNumTokens(model: Model, input: string | Conversation): number {
-  let tokenizerEntry = tokenizerStore[model];
+  const tokenizerEntry = getTokenizerEntry(model);
   // Check if input is a Conversation (an array of objects with 'role' and 'content')
   if (Array.isArray(input) && input.every(item => typeof item === 'object' && 'role' in item && 'content' in item)) {
     // Handle the Conversation input

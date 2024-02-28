@@ -1,0 +1,77 @@
+## Introduction
+
+### Supabase
+The Lobby Data System uses Supabase, a Backend-as-a-Service alternative to products like Firebase, for hosting and data storage. The purpose of this system is to facilitate seamless conversations between users and bots, and to ensure the safe and efficient storage of these interactions.
+
+The system uses Supabase's included Postgres database on top of which is built a comprehensive data schema. The data schema has been structured to include an array of tables pertinent to the system's functionality, such as organizations, bots, documents, document chunks, users, conversations, messages, and organization members. This schema has been carefully designed to ensure a stable data model for our system.
+
+### Postgres Functions
+To maintain the integrity of the data in the actual data schema tables, we've implemented a layer of postgres functions which handle data intensive tasks and have checks/constaints in order to maintain data table consistency.
+
+### Inference/Embedding Server
+The System is supported by Lobby's own Inference server. This server has endpoints for both text generation and text embedding tasks. An environment variable needs to be set as part of the Supabase deployment in order for the system to access the Inference server.
+
+### Edge Function HTTP API
+The Supabase Edge Function API (JS/Deno) included with the system is an essential component. It provides an HTTP interface for performing various functions, such as creating, updating, and retrieving users and organizations, and managing conversations.
+
+Authentication for the Edge Function API is handled using the built-in Supabase API authentication. The service role API key provided by Supabase is used to access the Edge Function endpoints and is included in the Authentication header.
+
+
+#### Authentication
+
+The Lobby Data API uses API keys for authentication. Visit the Supabase dashboard to retrieve the Service_Role_API_KEY 
+[https://supabase.com/dashboard/project/<project_id>/settings/api](https://supabase.com/dashboard/project/<project_id>/settings/api)
+
+**The Supabase Service Role API Key is a secret!** Do not share the key, expose it in client-side code. Request to the API must be routed through your own backend server or any environment where the API key can be securely loaded from an environment variable or key management service.
+
+All API requests must include the Supabase service role key in an `Authorization` HTTP header as follows:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+#### Making Requests
+
+HTTP Requests are made to the system using this base route:
+
+`https://<project_id>.supabase.co`
+
+The Supabase project url can be found here:
+[https://supabase.com/dashboard/project/<project_id>/settings/api](https://supabase.com/dashboard/project/<project_id>/settings/api)
+
+Or by navigating to the project from the dashboard:
+https://supabase.com/dashboard
+
+An example curl request would look like this:
+
+Example curl command:
+```bash
+curl --location -g --request GET 'https://<project_id>.supabase.co/functions/v1/data-api/v1/organizations' \
+--header 'Authorization: Bearer {{SUPABASE_SERVICE_ROLE_KEY}}'
+```
+
+Example with Javascript:
+```javascript
+var myHeaders = new Headers();
+myHeaders.append("Authorization", "Bearer {{SUPABASE_SERVICE_ROLE_KEY}}");
+
+var requestOptions = {
+    method: 'GET',
+    headers: myHeaders,
+    redirect: 'follow'
+};
+
+fetch("https://<project_id>.supabase.co/functions/v1/data-api/v1/organizations", requestOptions)
+    .then(response => response.text())
+    .then(result => console.log(result))
+    .catch(error => console.log('error', error));
+```
+## Getting Started
+
+
+
+
+## Inside the System
+
+![](./diagrams/main.png)
+

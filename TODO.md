@@ -1,0 +1,5 @@
+- get PATCH and DELETE routes working
+- add/test user scopes
+- verify/add status, message, data response format for all routes
+- improve token length checks for embedding, document ingestion, message generation
+- add options for list result sort order (and/or make default consistnant)

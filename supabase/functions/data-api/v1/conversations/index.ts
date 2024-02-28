@@ -1,5 +1,4 @@
 import { Router, Status } from "oak";
-import { messagesRouter } from "./messages/index.ts";
 
 const conversationsRouter = new Router();
 
@@ -71,18 +70,13 @@ conversationsRouter
       context.response.body = { data: data };
     }
   })
-  .put("/:convId", (context) => {
+  .patch("/:convId", (context) => {
     context.response.status = Status.NotImplemented;
     context.response.body = `Updating conversation with ID: ${context.params.convId}`;
   })
   .delete("/:convId", (context) => {
     context.response.status = Status.NotImplemented;
     context.response.body = `Deleting conversation with ID: ${context.params.convId}`;
-  })
-  .use(
-    "/:convId/messages",
-    messagesRouter.routes(),
-    messagesRouter.allowedMethods()
-  );
+  });
 
 export { conversationsRouter };

@@ -5,8 +5,8 @@ import {
   Role,
   getNumTokens,
   Message,
-} from "../../../../../_shared/utils.ts";
-import { openai, getJinaEmbeddings } from "../../../../../_shared/openai.ts";
+} from "../../../_shared/utils.ts";
+import { openai, getJinaEmbeddings } from "../../../_shared/openai.ts";
 
 const messagesRouter = new Router();
 
@@ -165,6 +165,8 @@ messagesRouter
         p_embedding_jina_v2_base_en: newUserMessageContentEmbedding,
       });
 
+      console.log(JSON.stringify(newUserMessageContentEmbedding))
+
     if (contextError) {
       context.response.status = Status.BadRequest;
       context.response.body = { error: botError };
@@ -202,7 +204,6 @@ messagesRouter
     ];
     const conversation_json = JSON.parse(JSON.stringify(conversation));
     // console.log("conversation_json:", conversation_json)
-
 
     // console.log("HERE");
 
@@ -247,7 +248,7 @@ messagesRouter
         const completion = await openai.chat.completions.create({
           messages: conversation_json,
           model: "mixtral",
-          stream: true
+          stream: true,
         });
         console.log("Sending data packets...");
         for await (const chunk of completion) {
@@ -310,7 +311,7 @@ messagesRouter
         );
         // console.log("newMessage:", newMessage);
 
-        let {
+        const {
           data: createNewAssistantMessageData,
           error: createNewAssistantMessageError,
         } = await context.state.sbclient.rpc("create_message", {
