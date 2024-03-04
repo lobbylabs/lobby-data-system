@@ -16,10 +16,19 @@ documentsRouter
 
     if (documentError) {
       context.response.status = Status.BadRequest;
-      context.response.body = { error: documentError };
+      context.response.body = {
+        status: context.response.status,
+        data: null,
+        message: documentError.message,
+        error_details: documentError,
+      };
     } else {
       context.response.status = Status.OK;
-      context.response.body = { data: documentData };
+      context.response.body = {
+        status: context.response.status,
+        data: documentData,
+        message: "Documents retrieved succesfully",
+      };
     }
   })
   .post("/", async (context) => {
@@ -40,12 +49,17 @@ documentsRouter
 
     if (documentError) {
       context.response.status = Status.BadRequest;
-      context.response.body = { error: documentError };
+      context.response.body = {
+        status: context.response.status,
+        data: null,
+        message: documentError.message,
+        error_details: documentError,
+      };
     }
 
     const chunks = await getChunks(text, 200);
-    console.log(chunks.length)
-    console.log("GOT CHUNKS!")
+    console.log(chunks.length);
+    console.log("GOT CHUNKS!");
     const { data: documentChunkData, error: documentChunkError } =
       await context.state.sbclient.rpc("create_document_chunks", {
         p_document_id: documentData[0].id,
@@ -56,7 +70,12 @@ documentsRouter
 
     if (documentChunkError) {
       context.response.status = Status.BadRequest;
-      context.response.body = { error: documentChunkError };
+      context.response.body = {
+        status: context.response.status,
+        data: null,
+        message: documentChunkError.message,
+        error_details: documentChunkError,
+      };
     }
 
     const { data: newDocumentData, error: newDocumentError } =
@@ -68,15 +87,49 @@ documentsRouter
 
     if (newDocumentError) {
       context.response.status = Status.BadRequest;
-      context.response.body = { error: newDocumentError };
+      context.response.body = {
+        status: context.response.status,
+        data: null,
+        message: newDocumentError.message,
+        error_details: newDocumentError,
+      };
     } else {
       context.response.status = Status.OK;
-      context.response.body = { data: newDocumentData };
+      context.response.body = {
+        status: context.response.status,
+        data: newDocumentData[0],
+        message: "Document created succesfully",
+      };
     }
   })
-  .get("/:docId", (context) => {
-    context.response.status = Status.NotImplemented;
-    context.response.body = `Fetching document with ID: ${context.params.docId}`;
+  .get("/:docId", async (context) => {
+    const orgId = context.params.orgId;
+    const botId = context.params.botId;
+    const docId = context.params.docId;
+
+    const { data: documentData, error: documentError } =
+      await context.state.sbclient.rpc("get_document", {
+        p_bot_id: botId,
+        p_organization_id: orgId,
+        p_document_id: docId,
+      });
+
+    if (documentError) {
+      context.response.status = Status.BadRequest;
+      context.response.body = {
+        status: context.response.status,
+        data: null,
+        message: documentError.message,
+        error_details: documentError,
+      };
+    } else {
+      context.response.status = Status.OK;
+      context.response.body = {
+        status: context.response.status,
+        data: documentData[0],
+        message: "Document retrieved succesfully",
+      };
+    }
   })
   .patch("/:docId", (context) => {
     context.response.status = Status.NotImplemented;
