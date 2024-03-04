@@ -604,7 +604,7 @@ BEGIN
     WHERE
         bd.bot_id = p_bot_id
         AND bd.organization_id = p_organization_id
-        AND d.id = p_document_id;
+        AND bd.document_id = p_document_id;
 END;
 $$
 LANGUAGE plpgsql
@@ -813,7 +813,7 @@ $$
 LANGUAGE plpgsql
 SECURITY DEFINER;
 
-CREATE OR REPLACE FUNCTION data.get_user_conversations(p_user_id uuid)
+CREATE OR REPLACE FUNCTION data.get_user_conversations(p_user_id uuid, p_organization_id uuid DEFAULT NULL, p_bot_id uuid DEFAULT NULL)
     RETURNS SETOF data.conversations
     AS $$
 BEGIN
@@ -822,8 +822,12 @@ BEGIN
         c.*
     FROM
         data.conversations c
-    WHERE
-        c.user_id = p_user_id
+    WHERE(p_user_id IS NULL
+        OR c.user_id = p_user_id)
+        AND(p_organization_id IS NULL
+            OR p_organization_id = c.organization_id)
+        AND(p_bot_id IS NULL
+            OR p_bot_id = c.bot_id)
     ORDER BY
         c.updated_at DESC;
 END;

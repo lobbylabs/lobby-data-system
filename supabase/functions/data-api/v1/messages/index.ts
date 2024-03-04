@@ -29,7 +29,12 @@ messagesRouter
 
     if (error) {
       context.response.status = Status.BadRequest;
-      context.response.body = { error: error };
+      context.response.body = {
+        status: context.response.status,
+        data: null,
+        message: documentError.message,
+        error_details: documentError,
+      };
     } else {
       context.response.status = Status.OK;
       if (data[0]) {
@@ -39,7 +44,11 @@ messagesRouter
         });
       }
 
-      context.response.body = { data: data };
+      context.response.body = {
+        status: context.response.status,
+        data: data,
+        message: "Messages retrieved succesfully",
+      };
     }
   })
   .post("/", async (context) => {
@@ -164,8 +173,10 @@ messagesRouter
         p_k: 5,
         p_embedding_jina_v2_base_en: newUserMessageContentEmbedding,
       });
+    console.log(contextData)
+    console.log("Retrieved", contextData, " context");
 
-      console.log(JSON.stringify(newUserMessageContentEmbedding))
+    // console.log(JSON.stringify(newUserMessageContentEmbedding));
 
     if (contextError) {
       context.response.status = Status.BadRequest;
@@ -192,6 +203,8 @@ messagesRouter
       contextText = contextText.slice(0, -2);
       // Prepend the context prefix and append everything to the existing message content
       systemMessage.content += `\n${contextPrefix}${contextText}`;
+    } else {
+      systemMessage.content = ""
     }
 
     // console.log(systemMessage.content)
