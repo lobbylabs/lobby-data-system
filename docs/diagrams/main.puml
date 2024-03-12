@@ -24,9 +24,6 @@ namespace "Data Schema" as data_schema {
     entity users << (T,#ADD1B2) table >> {
         *<size:16><color:DarkGoldenRod><&key></color></size> <b>id</b> : <i>uuid <<default: gen_random_uuid()>></i>
         ..
-        +<size:16><color:Gray><&key></color></size> <b>organization_id</b> (organizations.id) : <i>uuid</i>
-        ..
-
     }
     !endprocedure
     $init_users()
