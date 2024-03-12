@@ -381,7 +381,7 @@ messagesRouter
           }
           ret_data = fullConvoData;
         } else {
-          ret_data = createNewAssistantMessageData;
+          ret_data = createNewAssistantMessageData[0];
         }
 
         // console.log("ret_data:", ret_data);
