@@ -162,7 +162,6 @@ namespace "Data Schema" as data_schema {
     users [id] -[bold,#LightBlue]- [user_id] conversations
     users [id] -[bold,#LightBlue]- [user_id] messages
     organizations [user_id_owner] -[bold,#LightBlue]- [id] users
-    organizations [id] -[bold,#LightGreen]- [organization_id] users
     organizations [id] -[bold,#LightGreen]- [organization_id] organization_members
     organizations [id] -[bold,#LightGreen]- [organization_id] bots
     organizations [id] -[bold,#LightGreen]- [organization_id] conversations
@@ -197,7 +196,6 @@ users [id] -[bold,#LightBlue]- [user_id_owner] bots
 users [id] -[bold,#LightBlue]- [user_id] organization_members
 users [id] -[bold,#LightBlue]- [user_id] conversations
 users [id] -[bold,#LightBlue]- [user_id] messages
-organizations [id] -[bold,#LightGreen]- [organization_id] users
 
 newpage
 $init_legend()
