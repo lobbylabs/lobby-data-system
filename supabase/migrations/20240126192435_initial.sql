@@ -98,7 +98,8 @@ CREATE TABLE data.document_chunks(
 CREATE TABLE data.bot_documents(
     organization_id uuid REFERENCES data.organizations(id),
     bot_id uuid REFERENCES data.bots(id),
-    document_id uuid REFERENCES data.documents(id)
+    document_id uuid REFERENCES data.documents(id),
+    CONSTRAINT pk_bot_documents PRIMARY KEY (organization_id, bot_id, document_id)
 );
 
 -- User Conversations

@@ -1,8 +1,8 @@
 {
-    "openapi": "3.1.0",
+    "openapi": "3.0.1",
     "info": {
-        "title": "lobby-data-system",
-        "description": "",
+        "title": "Lobby Data API",
+        "description": "API Specification and documentation for the Lobby Data System",
         "version": "1.0.0"
     },
     "tags": [
@@ -26,17 +26,324 @@
         },
         {
             "name": "v1/Messages"
+        },
+        {
+            "name": "organizations"
+        },
+        {
+            "name": "bots"
+        },
+        {
+            "name": "documents"
+        },
+        {
+            "name": "users"
+        },
+        {
+            "name": "conversations"
+        },
+        {
+            "name": "messages"
         }
     ],
     "paths": {
+        "/functions/v1/data-api/v1/organizations": {
+            "get": {
+                "summary": "List all organizations",
+                "deprecated": false,
+                "description": "This route returns a list of all organizations in the system.",
+                "operationId": "get_organizations",
+                "tags": [
+                    "v1/Organizations",
+                    "v1",
+                    "organizations"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "organization_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "owner_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "user_ids": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/organizations/{organization_id}/bots": {
+            "get": {
+                "summary": "List all bots",
+                "deprecated": false,
+                "description": "This route returns a list of all bots in the specified organization. It requires an organization ID parameter to identify the organization.",
+                "operationId": "get_bots",
+                "tags": [
+                    "v1/Bots",
+                    "v1",
+                    "bots"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "organization_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "user_id_owner": {
+                                                        "type": "string"
+                                                    },
+                                                    "system_prompt": {
+                                                        "type": "string"
+                                                    },
+                                                    "bot_summary": {
+                                                        "type": "null"
+                                                    },
+                                                    "bot_summary_embedding_ada_002": {
+                                                        "type": "null"
+                                                    },
+                                                    "bot_summary_embedding_jina_v2_base_en": {
+                                                        "type": "null"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "organization_id",
+                                                    "user_id_owner",
+                                                    "system_prompt",
+                                                    "bot_summary",
+                                                    "bot_summary_embedding_ada_002",
+                                                    "bot_summary_embedding_jina_v2_base_en",
+                                                    "created_at",
+                                                    "updated_at"
+                                                ]
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "summary": "Create new bot",
+                "deprecated": false,
+                "description": "This route creates a new bot configuration within in the specified organization. It requires an organization ID parameter to identify the organization to create the new bot in. It also requires a user_id to act as the owner of that bot. The owner of a bot has the highest level of access to use/modify the bot by default.",
+                "operationId": "post_bots",
+                "tags": [
+                    "v1/Bots",
+                    "v1",
+                    "bots"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "system_prompt": {
+                                        "type": "string"
+                                    },
+                                    "user_id_owner": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "required": [
+                                    "system_prompt",
+                                    "user_id_owner"
+                                ]
+                            },
+                            "example": {
+                                "system_prompt": "{{test_system_prompt}}",
+                                "user_id_owner": "{{test_user_id}}"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "organization_id": {
+                                                    "type": "string"
+                                                },
+                                                "user_id_owner": {
+                                                    "type": "string"
+                                                },
+                                                "system_prompt": {
+                                                    "type": "string"
+                                                },
+                                                "bot_summary": {
+                                                    "type": "null"
+                                                },
+                                                "bot_summary_embedding_ada_002": {
+                                                    "type": "null"
+                                                },
+                                                "bot_summary_embedding_jina_v2_base_en": {
+                                                    "type": "null"
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "organization_id",
+                                                "user_id_owner",
+                                                "system_prompt",
+                                                "bot_summary",
+                                                "bot_summary_embedding_ada_002",
+                                                "bot_summary_embedding_jina_v2_base_en",
+                                                "created_at",
+                                                "updated_at"
+                                            ]
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
         "/functions/v1/data-api/v1/organizations/{organization_id}/bots/{bot_id}/documents": {
             "get": {
-                "summary": "documents",
+                "summary": "List bot documents",
                 "deprecated": false,
-                "description": "",
+                "description": "This route returns a list of all documents associated with the specified bot. It requires an organization ID parameter to identify the organization, and a bot ID parameter to identify the bot.",
                 "operationId": "get_documents",
                 "tags": [
-                    "v1/Documents"
+                    "v1/Documents",
+                    "v1",
+                    "documents"
                 ],
                 "parameters": [
                     {
@@ -62,12 +369,102 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
-                                    "properties": {}
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "organization_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "title": {
+                                                        "type": "string"
+                                                    },
+                                                    "author": {
+                                                        "type": "null"
+                                                    },
+                                                    "source_url": {
+                                                        "type": "string"
+                                                    },
+                                                    "document_type": {
+                                                        "type": "string"
+                                                    },
+                                                    "content": {
+                                                        "type": "null"
+                                                    },
+                                                    "content_size_kb": {
+                                                        "type": "null"
+                                                    },
+                                                    "content_embedding_ada_002": {
+                                                        "type": "null"
+                                                    },
+                                                    "content_embedding_jina_v2_base_en": {
+                                                        "type": "null"
+                                                    },
+                                                    "document_summary": {
+                                                        "type": "null"
+                                                    },
+                                                    "document_summary_embedding_ada_002": {
+                                                        "type": "null"
+                                                    },
+                                                    "document_summary_embedding_jina_v2_base_en": {
+                                                        "type": "null"
+                                                    },
+                                                    "mime_type": {
+                                                        "type": "null"
+                                                    },
+                                                    "num_chunks": {
+                                                        "type": "integer"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "organization_id",
+                                                    "title",
+                                                    "author",
+                                                    "source_url",
+                                                    "document_type",
+                                                    "content",
+                                                    "content_size_kb",
+                                                    "content_embedding_ada_002",
+                                                    "content_embedding_jina_v2_base_en",
+                                                    "document_summary",
+                                                    "document_summary_embedding_ada_002",
+                                                    "document_summary_embedding_jina_v2_base_en",
+                                                    "mime_type",
+                                                    "num_chunks",
+                                                    "created_at",
+                                                    "updated_at"
+                                                ]
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
                                 }
                             }
                         }
@@ -80,12 +477,14 @@
                 ]
             },
             "post": {
-                "summary": "documents",
+                "summary": "Create new bot document",
                 "deprecated": false,
-                "description": "",
-                "operationId": "post_documents",
+                "description": "This route creates a new document document in the specified bot in the specified organization. It requires an organization ID parameter to identify the organization, and a bot ID parameter to identify the bot. It also requires a JSON payload in the request body that contains the document's details, such as the source_url, text content, and document title.",
+                "operationId": "create_document",
                 "tags": [
-                    "v1/Documents"
+                    "v1/Documents",
+                    "v1",
+                    "documents"
                 ],
                 "parameters": [
                     {
@@ -141,12 +540,99 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
-                                    "properties": {}
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "organization_id": {
+                                                    "type": "string"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "author": {
+                                                    "type": "null"
+                                                },
+                                                "source_url": {
+                                                    "type": "string"
+                                                },
+                                                "document_type": {
+                                                    "type": "string"
+                                                },
+                                                "content": {
+                                                    "type": "null"
+                                                },
+                                                "content_size_kb": {
+                                                    "type": "null"
+                                                },
+                                                "content_embedding_ada_002": {
+                                                    "type": "null"
+                                                },
+                                                "content_embedding_jina_v2_base_en": {
+                                                    "type": "null"
+                                                },
+                                                "document_summary": {
+                                                    "type": "null"
+                                                },
+                                                "document_summary_embedding_ada_002": {
+                                                    "type": "null"
+                                                },
+                                                "document_summary_embedding_jina_v2_base_en": {
+                                                    "type": "null"
+                                                },
+                                                "mime_type": {
+                                                    "type": "null"
+                                                },
+                                                "num_chunks": {
+                                                    "type": "integer"
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "organization_id",
+                                                "title",
+                                                "author",
+                                                "source_url",
+                                                "document_type",
+                                                "content",
+                                                "content_size_kb",
+                                                "content_embedding_ada_002",
+                                                "content_embedding_jina_v2_base_en",
+                                                "document_summary",
+                                                "document_summary_embedding_ada_002",
+                                                "document_summary_embedding_jina_v2_base_en",
+                                                "mime_type",
+                                                "num_chunks",
+                                                "created_at",
+                                                "updated_at"
+                                            ]
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
                                 }
                             }
                         }
@@ -159,22 +645,192 @@
                 ]
             }
         },
-        "/functions/v1/data-api/v1/organizations/{organization_id}/bots": {
+        "/functions/v1/data-api/v1/users": {
             "get": {
-                "summary": "bots",
+                "summary": "List all users",
                 "deprecated": false,
-                "description": "",
-                "operationId": "get_bots",
+                "description": "This route returns a list of all users in the system. Each entry specifies the user id and the IDs of the organizations that user is associated with.",
+                "operationId": "get_users",
                 "tags": [
-                    "v1/Bots"
+                    "v1/Users",
+                    "v1",
+                    "users"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "user_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "organization_ids": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "post": {
+                "summary": "Create new user",
+                "deprecated": false,
+                "description": "This route creates a new user in the system. By default the user will be created along with a new organization, but an organization id can be provided in the request body to create the user within an existing organization instead.",
+                "operationId": "create_user",
+                "tags": [
+                    "v1/Users",
+                    "v1",
+                    "users"
+                ],
+                "parameters": [],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "organization_id": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "required": [
+                                    "organization_id"
+                                ]
+                            },
+                            "example": {
+                                "organization_id": "{{test_organization_id}}"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "user_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "organization_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "user_scopes": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/users/{user_id}/conversations": {
+            "get": {
+                "summary": "List user conversations",
+                "deprecated": false,
+                "description": "This route lists all conversations of the specified user. The returned conversations can be filtered by bot id, organization id, or both.",
+                "operationId": "get_conversations",
+                "tags": [
+                    "v1/Conversations",
+                    "v1",
+                    "conversations"
                 ],
                 "parameters": [
                     {
-                        "name": "organization_id",
+                        "name": "user_id",
                         "in": "path",
                         "description": "",
                         "required": true,
-                        "example": "{{test_organization_id}}",
+                        "example": "{{test_user_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "p_organization_id",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "p_bot_id",
+                        "in": "query",
+                        "description": "",
+                        "required": false,
                         "schema": {
                             "type": "string"
                         }
@@ -200,20 +856,22 @@
                 ]
             },
             "post": {
-                "summary": "bots",
+                "summary": "Create new conversation",
                 "deprecated": false,
-                "description": "",
-                "operationId": "post_bots",
+                "description": "This route creates a new conversation for the specified user.  The new conversation is associated with the organization id and bot id provided in the request body.",
+                "operationId": "post_conversations",
                 "tags": [
-                    "v1/Bots"
+                    "v1/Conversations",
+                    "v1",
+                    "conversations"
                 ],
                 "parameters": [
                     {
-                        "name": "organization_id",
+                        "name": "user_id",
                         "in": "path",
                         "description": "",
                         "required": true,
-                        "example": "{{test_organization_id}}",
+                        "example": "{{test_user_id}}",
                         "schema": {
                             "type": "string"
                         }
@@ -225,105 +883,90 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "system_prompt": {
-                                        "type": "string"
+                                    "bot_id": {
+                                        "type": "string",
+                                        "format": "uuid"
                                     },
-                                    "user_id_owner": {
+                                    "organization_id": {
                                         "type": "string",
                                         "format": "uuid"
                                     }
                                 },
                                 "required": [
-                                    "system_prompt",
-                                    "user_id_owner"
+                                    "bot_id",
+                                    "organization_id"
                                 ]
                             },
                             "example": {
-                                "system_prompt": "{{test_system_prompt}}",
-                                "user_id_owner": "{{test_user_id}}"
+                                "bot_id": "{{test_bot_id}}",
+                                "organization_id": "{{test_organization_id}}"
                             }
                         }
                     }
                 },
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
-                                    "properties": {}
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ]
-            }
-        },
-        "/functions/v1/data-api/v1/organizations": {
-            "get": {
-                "summary": "organizations",
-                "deprecated": false,
-                "description": "",
-                "operationId": "get_organizations",
-                "tags": [
-                    "v1/Organizations"
-                ],
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {}
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ]
-            }
-        },
-        "/functions/v1/data-api/v1/organizations/{organization_id}/users": {
-            "get": {
-                "summary": "organizations/{org_id}/users",
-                "deprecated": false,
-                "description": "",
-                "operationId": "get_organizations_users",
-                "tags": [
-                    "v1/Organizations"
-                ],
-                "parameters": [
-                    {
-                        "name": "organization_id",
-                        "in": "path",
-                        "description": "",
-                        "required": true,
-                        "example": "{{test_organization_id}}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {}
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "user_id": {
+                                                    "type": "string"
+                                                },
+                                                "organization_id": {
+                                                    "type": "string"
+                                                },
+                                                "bot_id": {
+                                                    "type": "string"
+                                                },
+                                                "conversation_summary": {
+                                                    "type": "null"
+                                                },
+                                                "conversation_summary_embedding_ada_002": {
+                                                    "type": "null"
+                                                },
+                                                "conversation_summary_embedding_jina_v2_base_en": {
+                                                    "type": "null"
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "user_id",
+                                                "organization_id",
+                                                "bot_id",
+                                                "conversation_summary",
+                                                "conversation_summary_embedding_ada_002",
+                                                "conversation_summary_embedding_jina_v2_base_en",
+                                                "created_at",
+                                                "updated_at"
+                                            ]
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
                                 }
                             }
                         }
@@ -338,12 +981,14 @@
         },
         "/functions/v1/data-api/v1/users/{user_id}/conversations/{conversation_id}/messages": {
             "get": {
-                "summary": "messages",
+                "summary": "List conversation messages",
                 "deprecated": false,
-                "description": "",
+                "description": "This route returns a list of all messages in the specified user conversation ordered by descending created time. (Most recent message last in the list)",
                 "operationId": "get_messages",
                 "tags": [
-                    "v1/Messages"
+                    "v1/Messages",
+                    "v1",
+                    "messages"
                 ],
                 "parameters": [
                     {
@@ -387,12 +1032,14 @@
                 ]
             },
             "post": {
-                "summary": "messages",
+                "summary": "Generate new message",
                 "deprecated": false,
-                "description": "",
+                "description": "This route generates a new message in the specified user conversation. The request body requires the bot id, organization id, and input fields.\n\nnum_message_history is the max number of messages that will be included as chat history during the generation of the new message.\n\nIf full_conversation is set to true, a list of all conversation messages will be returned instead of the newly generated message. (Same response format as [List conversation messages](api-3485867))\n\nThis route includes a streaming option which will return partial messages in the form of server sent events. By default these events each contain a distinct fragment of the final message. If \"accumulate\" is set to true, each event will include all generated fragments up to that point.\n\nWhen streaming is enabled, the last data message received will contain the same response as when streaming is disabled, this will either be the standard newly generated message or the list of al conversation messages if \"full_conversation\" is set to true.",
                 "operationId": "post_messages",
                 "tags": [
-                    "v1/Messages"
+                    "v1/Messages",
+                    "v1",
+                    "messages"
                 ],
                 "parameters": [
                     {
@@ -463,19 +1110,70 @@
                                 "input": "{{test_message_input}}",
                                 "num_message_history": 5,
                                 "organization_id": "{{test_organization_id}}",
-                                "stream": true
+                                "stream": false
                             }
                         }
                     }
                 },
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "OK",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
-                                    "properties": {}
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "user_id": {
+                                                    "type": "string"
+                                                },
+                                                "organization_id": {
+                                                    "type": "string"
+                                                },
+                                                "bot_id": {
+                                                    "type": "string"
+                                                },
+                                                "conversation_id": {
+                                                    "type": "string"
+                                                },
+                                                "message_type": {
+                                                    "type": "string"
+                                                },
+                                                "message_index": {
+                                                    "type": "integer"
+                                                },
+                                                "message_content": {
+                                                    "type": "string"
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "user_id",
+                                                "organization_id",
+                                                "bot_id",
+                                                "conversation_id",
+                                                "message_type",
+                                                "message_index",
+                                                "message_content",
+                                                "created_at",
+                                                "updated_at"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
                                 }
                             }
                         }
@@ -487,105 +1185,279 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {}
+                                },
+                                "examples": {
+                                    "1": {
+                                        "summary": "Success",
+                                        "value": ""
+                                    }
                                 }
                             }
                         }
-                    }
-                },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ]
-            }
-        },
-        "/functions/v1/data-api/v1/users/{user_id}/conversations": {
-            "get": {
-                "summary": "conversations",
-                "deprecated": false,
-                "description": "",
-                "operationId": "get_conversations",
-                "tags": [
-                    "v1/Conversations"
-                ],
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "description": "",
-                        "required": true,
-                        "example": "{{test_user_id}}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
+                    },
+                    "x-200:Success Conversation": {
+                        "description": "Success Conversation",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
-                                    "properties": {}
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ]
-            },
-            "post": {
-                "summary": "conversations",
-                "deprecated": false,
-                "description": "",
-                "operationId": "post_conversations",
-                "tags": [
-                    "v1/Conversations"
-                ],
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "description": "",
-                        "required": true,
-                        "example": "{{test_user_id}}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "bot_id": {
-                                        "type": "string",
-                                        "format": "uuid"
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "user_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "organization_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "bot_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "conversation_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "message_type": {
+                                                        "type": "string"
+                                                    },
+                                                    "message_index": {
+                                                        "type": "integer"
+                                                    },
+                                                    "message_content": {
+                                                        "type": "string"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "user_id",
+                                                    "organization_id",
+                                                    "bot_id",
+                                                    "conversation_id",
+                                                    "message_type",
+                                                    "message_index",
+                                                    "message_content",
+                                                    "created_at",
+                                                    "updated_at"
+                                                ]
+                                            }
+                                        }
                                     },
-                                    "organization_id": {
-                                        "type": "string",
-                                        "format": "uuid"
-                                    }
-                                },
-                                "required": [
-                                    "bot_id",
-                                    "organization_id"
-                                ]
-                            },
-                            "example": {
-                                "bot_id": "{{test_bot_id}}",
-                                "organization_id": "{{test_organization_id}}"
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
                             }
                         }
                     }
                 },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/organizations/{organization_id}/bots/{bot_id}": {
+            "get": {
+                "summary": "Get bot details",
+                "deprecated": false,
+                "description": "This route returns a the details of a specific bot in the specified organization. It requires an organization ID parameter to identify the organization to search within and a bot ID.",
+                "operationId": "get_bot",
+                "tags": [
+                    "v1/Bots",
+                    "v1",
+                    "bots"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bot_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_bot_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "organization_id": {
+                                                    "type": "string"
+                                                },
+                                                "user_id_owner": {
+                                                    "type": "string"
+                                                },
+                                                "system_prompt": {
+                                                    "type": "string"
+                                                },
+                                                "bot_summary": {
+                                                    "type": "null"
+                                                },
+                                                "bot_summary_embedding_ada_002": {
+                                                    "type": "null"
+                                                },
+                                                "bot_summary_embedding_jina_v2_base_en": {
+                                                    "type": "null"
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "organization_id",
+                                                "user_id_owner",
+                                                "system_prompt",
+                                                "bot_summary",
+                                                "bot_summary_embedding_ada_002",
+                                                "bot_summary_embedding_jina_v2_base_en",
+                                                "created_at",
+                                                "updated_at"
+                                            ]
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "patch": {
+                "summary": "Update bot details",
+                "deprecated": false,
+                "description": "",
+                "operationId": "get_bot",
+                "tags": [
+                    "v1/Bots",
+                    "v1",
+                    "bots"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bot_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_bot_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "delete": {
+                "summary": "Delete bot",
+                "deprecated": false,
+                "description": "",
+                "operationId": "delete_bot",
+                "tags": [
+                    "v1/Bots",
+                    "v1",
+                    "bots"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bot_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{bot test_bot_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Success",
@@ -606,16 +1478,49 @@
                 ]
             }
         },
-        "/functions/v1/data-api/v1/users": {
-            "get": {
-                "summary": "users",
+        "/functions/v1/data-api/v1/organizations/{organization_id}/bots/{bot_id}/documents/{document_id}": {
+            "patch": {
+                "summary": "Update document details",
                 "deprecated": false,
                 "description": "",
-                "operationId": "get_users",
+                "operationId": "update_document",
                 "tags": [
-                    "v1/Users"
+                    "v1/Documents",
+                    "v1",
+                    "documents"
                 ],
-                "parameters": [],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bot_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_bot_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "document_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Success",
@@ -635,36 +1540,449 @@
                     }
                 ]
             },
-            "post": {
-                "summary": "users",
+            "delete": {
+                "summary": "Delete document",
                 "deprecated": false,
                 "description": "",
-                "operationId": "post_users",
+                "operationId": "delete_document",
                 "tags": [
-                    "v1/Users"
+                    "v1/Documents",
+                    "v1",
+                    "documents"
                 ],
-                "parameters": [],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "organization_id": {
-                                        "type": "string",
-                                        "format": "uuid"
-                                    }
-                                },
-                                "required": [
-                                    "organization_id"
-                                ]
-                            },
-                            "example": {
-                                "organization_id": "{{test_organization_id}}"
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bot_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_bot_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "document_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
                             }
                         }
                     }
                 },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "get": {
+                "summary": "Get document details",
+                "deprecated": false,
+                "description": "This route returns the details of a specific document associated with the specified bot. It requires an organization ID parameter to identify the organization, and a bot ID parameter to identify the bot.",
+                "operationId": "get_document",
+                "tags": [
+                    "v1/Documents",
+                    "v1",
+                    "documents"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bot_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_bot_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "document_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "organization_id": {
+                                                    "type": "string"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "author": {
+                                                    "type": "null"
+                                                },
+                                                "source_url": {
+                                                    "type": "string"
+                                                },
+                                                "document_type": {
+                                                    "type": "string"
+                                                },
+                                                "content": {
+                                                    "type": "null"
+                                                },
+                                                "content_size_kb": {
+                                                    "type": "null"
+                                                },
+                                                "content_embedding_ada_002": {
+                                                    "type": "null"
+                                                },
+                                                "content_embedding_jina_v2_base_en": {
+                                                    "type": "null"
+                                                },
+                                                "document_summary": {
+                                                    "type": "null"
+                                                },
+                                                "document_summary_embedding_ada_002": {
+                                                    "type": "null"
+                                                },
+                                                "document_summary_embedding_jina_v2_base_en": {
+                                                    "type": "null"
+                                                },
+                                                "mime_type": {
+                                                    "type": "null"
+                                                },
+                                                "num_chunks": {
+                                                    "type": "integer"
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "organization_id",
+                                                "title",
+                                                "author",
+                                                "source_url",
+                                                "document_type",
+                                                "content",
+                                                "content_size_kb",
+                                                "content_embedding_ada_002",
+                                                "content_embedding_jina_v2_base_en",
+                                                "document_summary",
+                                                "document_summary_embedding_ada_002",
+                                                "document_summary_embedding_jina_v2_base_en",
+                                                "mime_type",
+                                                "num_chunks",
+                                                "created_at",
+                                                "updated_at"
+                                            ]
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/users/{user_id}/conversations/{conversation_id}": {
+            "get": {
+                "summary": "Get conversation details",
+                "deprecated": false,
+                "description": "This route retrieves all conversation details of the specified conversation. This route requires a user id and conversation id.",
+                "operationId": "get_conversation",
+                "tags": [
+                    "v1/Conversations",
+                    "v1",
+                    "conversations"
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_user_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "conversation_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_conversation_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string"
+                                                },
+                                                "user_id": {
+                                                    "type": "string"
+                                                },
+                                                "organization_id": {
+                                                    "type": "string"
+                                                },
+                                                "bot_id": {
+                                                    "type": "string"
+                                                },
+                                                "conversation_summary": {
+                                                    "type": "null"
+                                                },
+                                                "conversation_summary_embedding_ada_002": {
+                                                    "type": "null"
+                                                },
+                                                "conversation_summary_embedding_jina_v2_base_en": {
+                                                    "type": "null"
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "user_id",
+                                                "organization_id",
+                                                "bot_id",
+                                                "conversation_summary",
+                                                "conversation_summary_embedding_ada_002",
+                                                "conversation_summary_embedding_jina_v2_base_en",
+                                                "created_at",
+                                                "updated_at"
+                                            ]
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "patch": {
+                "summary": "Update conversation details",
+                "deprecated": false,
+                "description": "",
+                "operationId": "update_conversation",
+                "tags": [
+                    "v1/Conversations",
+                    "v1",
+                    "conversations"
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_user_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "conversation_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_conversation_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "delete": {
+                "summary": "Delete conversation",
+                "deprecated": false,
+                "description": "",
+                "operationId": "delete_conversation",
+                "tags": [
+                    "v1/Conversations",
+                    "v1",
+                    "conversations"
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_user_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "conversation_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_conversation_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/organizations/{organization_id}/users": {
+            "get": {
+                "summary": "List all organization users",
+                "deprecated": false,
+                "description": "This route returns a list of all users in the specified organization. The list of use details includes the organization id, user id, and scopes within the specified organization.",
+                "operationId": "get_organization_users",
+                "tags": [
+                    "v1/Organizations",
+                    "v1",
+                    "organizations"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Success",
@@ -687,12 +2005,93 @@
         },
         "/functions/v1/data-api/v1/users/{user_id}": {
             "get": {
-                "summary": "users/{user_id}",
+                "summary": "Get user details",
+                "deprecated": false,
+                "description": "This route returns the details of the specified user. It requires a user ID parameter to identify the user. The list returned contains each relationship that the specified user has to an organization, the id of the organization, and the scopes the user has in the specified organization.",
+                "operationId": "get_user",
+                "tags": [
+                    "v1/Users",
+                    "v1",
+                    "users"
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_user_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "user_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "organization_id": {
+                                                        "type": "string"
+                                                    },
+                                                    "user_scopes": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string"
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "patch": {
+                "summary": "Update user details",
                 "deprecated": false,
                 "description": "",
-                "operationId": "get_users_user_id",
+                "operationId": "update_user",
                 "tags": [
-                    "v1/Users"
+                    "v1/Users",
+                    "v1",
+                    "users"
                 ],
                 "parameters": [
                     {
@@ -714,6 +2113,219 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            },
+            "delete": {
+                "summary": "Delete user",
+                "deprecated": false,
+                "description": "",
+                "operationId": "delete_user",
+                "tags": [
+                    "v1/Users",
+                    "v1",
+                    "users"
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_user_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {}
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/organizations/{organization_id}": {
+            "get": {
+                "summary": "Get organization details",
+                "deprecated": false,
+                "description": "This route returns a list of all users in the specified organization. It requires an organization ID parameter to identify the organization.",
+                "operationId": "get_organization",
+                "tags": [
+                    "v1/Organizations",
+                    "v1",
+                    "organizations"
+                ],
+                "parameters": [
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "organization_id": {
+                                                    "type": "string"
+                                                },
+                                                "owner_id": {
+                                                    "type": "string"
+                                                },
+                                                "user_ids": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "organization_id",
+                                                "owner_id",
+                                                "user_ids"
+                                            ]
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
+            }
+        },
+        "/functions/v1/data-api/v1/users/{user_id}/organizations/{organization_id}": {
+            "post": {
+                "summary": "Add user to organization",
+                "deprecated": false,
+                "description": "This route will add the specified user to an existing organization with the specified organization id",
+                "operationId": "add_user_org",
+                "tags": [
+                    "v1/Users",
+                    "v1",
+                    "users"
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_user_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "organization_id",
+                        "in": "path",
+                        "description": "",
+                        "required": true,
+                        "example": "{{test_organization_id}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "user_id": {
+                                                    "type": "string"
+                                                },
+                                                "organization_id": {
+                                                    "type": "string"
+                                                },
+                                                "user_scopes": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "created_at": {
+                                                    "type": "string"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "user_id",
+                                                "organization_id",
+                                                "user_scopes",
+                                                "created_at",
+                                                "updated_at"
+                                            ]
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "data",
+                                        "message"
+                                    ]
                                 }
                             }
                         }
