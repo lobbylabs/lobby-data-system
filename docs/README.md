@@ -108,8 +108,7 @@ fetch("https://<project_id>.supabase.co/functions/v1/data-api/v1/organizations",
    * Enter database password (save in a secure location)
    * Select desired region (this is where the supabase postgres database and other supabase data will be located)
    * Click "Create new project"
-3. Invite team members to organization
-    * Set user permissions to Administrator for setup/configuration tasks (creating schemas, etc.), otherwise set to developer.
+3. Follow instructions for setting up the project for the first time [here](../README.md)
 
 
 ## Using the Lobby Data API
