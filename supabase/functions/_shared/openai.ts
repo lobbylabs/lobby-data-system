@@ -3,8 +3,8 @@ import { Model, getNumTokens } from "./utils.ts";
 
 // Configure your OpenAI client
 const openai = new OpenAI({
-  apiKey: Deno.env.get("INFERENCE_SERVER_TOKEN")!,
-  baseURL: "https://api.lobby-edge.com/v1",
+  apiKey: Deno.env.get("INFERENCE_SERVER_API_KEY")!,
+  baseURL: Deno.env.get("INFERENCE_SERVER_BASE_URL")!,
 });
 
 async function getJinaEmbeddings(texts: string[]): Promise<number[][]> {
